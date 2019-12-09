@@ -40,7 +40,7 @@ class Planet():
 
         alpha : float, optional
             Dispersion coefficient
-
+o90okl
         Rp : float, optional
             Planet radius (m)
 
@@ -193,7 +193,10 @@ class Planet():
         """
 
         # Enter your code here to solve the differential equations
-        T = 60
+        if radians is False:
+            angle = angle * (np.pi)/180
+
+        T = 120
         T_arr = []
         t = 0
         T_arr.append(0)
@@ -202,18 +205,16 @@ class Planet():
         y = np.array([velocity, mass, angle, init_altitude, init_distance, radius])
         Y = []
         Y.append(y)
-        if radians == False:
-            angle = angle * (np.pi)/180
+
         while t <= T:
             t = t + dt
             T_arr.append(t)
 
             if strength >= (self.rhoa(y[3]) * y[0]**2):
                 fragmented = True
-                #print('fragmented', y[3])
             else:
                 fragmented = False
-            y = self.explicit_euler(y, self.f, dt, fragmented, density)
+            y = self.midpoint_implicit_euler(y, self.f, dt, fragmented, density)
             Y.append(y)
             
             if y[3] <= 0:
@@ -289,6 +290,18 @@ class Planet():
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
+        
+        if result.mass[-1] == 0:
+            index_max = result.dedz.idxmax()
+            burst_peak_dedz = result.dedz[index_max]
+            burst_altitude = result.altitude[index_max]
+            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - 
+                                (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
+                                
+        elif result.mass[-1] != 0:
+            impact_time = result.time[-1]
+            impact_mass = result.mass[-1]
+            impact_speed = result.velocity[-1]
 
         # Enter your code here to process the result DataFrame and
         # populate the outcome dictionary.
@@ -300,18 +313,18 @@ class Planet():
         0: velocity
         1: mass
         2: angle
-        3: height
+        3: altitude
         4: distance
         5: radius
         '''
         f = np.zeros_like(y)
-        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + self.g *           np.sin(y[2])
-        f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3)/(2*self.Q)
-        f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y         [0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
+        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + (self.g *           np.sin(y[2]))
+        f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / (2 * self.Q)
+        f[2] = (self.g * np.cos(y[2])) / y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 *         y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
-        f[4] = - (y[0] * np.cos(y[2]))/(1 + y[3]/self.Rp)
+        f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
-            f[5] = (7/2 * self.alpha * self.rhoa(y[3]) / density)**(1/2) * y[0]
+            f[5] = (7/2 * self.alpha * (self.rhoa(y[3]) / density))**(1/2) * y[0]
         else:
             f[5] = 0
         return f
