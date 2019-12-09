@@ -207,10 +207,17 @@ class Planet():
         while t <= T:
             T_arr.append(t)
             t = t + dt
-            y = self.explicit_euler(y, self.f, dt)
+            if strength >= (self.rhoa(y[3]) * y[0]**2):
+                fragmented = True
+                print('fragmented', y[3])
+            else:
+                fragmented = False
+            y = self.explicit_euler(y, self.f, dt, fragmented, density)
             Y.append(y)
+            
             if y[3] <= 0:
                 break
+
         Y = np.array(Y)
         return pd.DataFrame({'velocity': Y[:, 0],
                              'mass': Y[:, 1],
@@ -283,7 +290,7 @@ class Planet():
         outcome = {}
         return outcome
 
-    def f(self, y):
+    def f(self, y, fragmented, density):
         '''
         0: velocity
         1: mass
@@ -298,19 +305,22 @@ class Planet():
         f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y         [0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
         f[4] = - (y[0] * np.cos(y[2]))/(1 + y[3]/self.Rp)
-        f[5] = 0
+        if fragmented == True:
+            f[5] = (7/2 * self.alpha * self.rhoa(y[3]) / density)**(1/2) * y[0]
+        else:
+            f[5] = 0
         return f
 
-    def explicit_euler(self, y, f, dt):
-        y = y + f(y) * dt
+    def explicit_euler(self, y, f, dt, fragmented, density):
+        y = y + f(y, fragmented, density) * dt
         return y
         
-    def implicit_euler(self, y, f, dt):
-        y_dummy = y + f(y) * dt
-        y = y + f(y_dummy) * dt
+    def implicit_euler(self, y, f, dt, fragmented, density):
+        y_dummy = y + f(y, fragmented, density) * dt
+        y = y + f(y_dummy, fragmented, density) * dt
         return y
         
-    def midpoint_implicit_euler(self, y, f, dt):
-        y_dummy = y + f(y) * dt
-        y = y + (f(y) + f(y_dummy)) * 0.5 * dt
+    def midpoint_implicit_euler(self, y, f, dt, fragmented, density):
+        y_dummy = y + f(y, fragmented, density) * dt
+        y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
         return y
