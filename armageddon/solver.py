@@ -225,9 +225,12 @@ class Planet():
 
         # Replace these lines with your code to add the dedz column to
         # the result DataFrame
-        result = result.copy()
+        '''result = result.copy()
         result.insert(len(result.columns),
                       'dedz', np.array(np.nan))
+        '''
+
+
 
         return result
 
@@ -271,3 +274,17 @@ class Planet():
         f[3] = - y[0] * np.sin(y[2])
         f[4] = - (y[0] * np.cos(y[2]))/(1 + y[3]/self.Rp)
         return f
+
+    def explicit_euler(y, f, dt):
+        y = y + f(y) * dt
+        return y
+    
+    def implicit_euler(y, f, dt):
+        y_dummy = y + f(y) * dt
+        y = y + f(y_dummy) * dt
+        return y
+    
+    def midpoint_implicit_euler(y, f, dt):
+        y_dummy = y + f(y) * dt
+        y = y + (f(y) + f(y_dummy)) * 0.5 * dt
+        return y
