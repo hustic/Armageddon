@@ -262,3 +262,12 @@ class Planet():
         # populate the outcome dictionary.
         outcome = {}
         return outcome
+
+    def f(y):
+        f = np.zeros_like(y)
+        f[0] = - (self.Cd * self.rhoa * y[0]**2)/(2 * y[1]) + self.g * np.sin(y[2])
+        f[1] = - (self.Ch * self.rhoa * np.pi * y[5]**2 * y[0]**3)/(2*self.Q)
+        f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa * np.pi * y[5]**2 * y[0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
+        f[3] = - y[0] * np.sin(y[2])
+        f[4] = - (y[0] * np.cos(y[2]))/(1 + y[3]/self.Rp)
+        return f
