@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 class Planet():
     """
     The class called Planet is initialised with constants appropriate
@@ -72,7 +71,7 @@ class Planet():
         self.rho0 = rho0
 
         if atmos_func == 'exponential':
-            raise NotImplementedError
+            self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
             raise NotImplementedError
         elif atmos_func == 'mars':
@@ -197,25 +196,29 @@ class Planet():
         T = 60
         T_arr = []
         t = 0
+        T_arr.append(0)
         mass = density * 4/3 * radius**3 * np.pi
         init_distance = 0
         y = np.array([velocity, mass, angle, init_altitude, init_distance, radius])
         Y = []
+        Y.append(y)
+        if radians == False:
+            angle = angle * (np.pi)/180
         while t <= T:
             T_arr.append(t)
             t = t + dt
             y = self.explicit_euler(y, self.f, dt)
             Y.append(y)
-
-        print(Y)
-
-        return pd.DataFrame({'velocity': velocity,
-                             'mass': np.nan,
-                             'angle': angle,
-                             'altitude': init_altitude,
-                             'distance': 0.0,
-                             'radius': radius,
-                             'time': 0.0}, index=range(1))
+            if y[3] <= 0:
+                break
+        Y = np.array(Y)
+        return pd.DataFrame({'velocity': Y[:, 0],
+                             'mass': Y[:, 1],
+                             'angle': Y[:, 2],
+                             'altitude': Y[:, 3],
+                             'distance': Y[:, 4],
+                             'radius': Y[:, 5],
+                             'time': T_arr})#, index=range(1))
 
     def calculate_energy(self, result):
         """
@@ -281,10 +284,18 @@ class Planet():
         return outcome
 
     def f(self, y):
+        '''
+        0: velocity
+        1: mass
+        2: angle
+        3: height
+        4: distance
+        5: radius
+        '''
         f = np.zeros_like(y)
-        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2)/(2 * y[1]) + self.g * np.sin(y[2])
+        f[0] = (-self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + self.g *           np.sin(y[2])
         f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3)/(2*self.Q)
-        f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
+        f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y         [0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
         f[4] = - (y[0] * np.cos(y[2]))/(1 + y[3]/self.Rp)
         f[5] = 0
@@ -303,6 +314,3 @@ class Planet():
         y_dummy = y + f(y) * dt
         y = y + (f(y) + f(y_dummy)) * 0.5 * dt
         return y
-
-earth = Planet(atmos_func='constant')
-earth.solve_atmospheric_entry(40, 20000, 1400, 1, 60)
