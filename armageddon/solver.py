@@ -205,11 +205,12 @@ class Planet():
         if radians == False:
             angle = angle * (np.pi)/180
         while t <= T:
-            T_arr.append(t)
             t = t + dt
+            T_arr.append(t)
+
             if strength >= (self.rhoa(y[3]) * y[0]**2):
                 fragmented = True
-                print('fragmented', y[3])
+                #print('fragmented', y[3])
             else:
                 fragmented = False
             y = self.explicit_euler(y, self.f, dt, fragmented, density)
@@ -249,12 +250,16 @@ class Planet():
 
         # Replace these lines with your code to add the dedz column to
         # the result DataFrame
-        '''result = result.copy()
+
+        result = result.copy()
+
+        dedz = np.zeros((len(result),))
+        dedz[0] = 0
+        for i in range(1,len(result)):
+            dedz[i] = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 * result.mass[i-1] * result.velocity[i-1]**2)) / (result.altitude[i] - result.altitude[i-1])
+
         result.insert(len(result.columns),
-                      'dedz', np.array(np.nan))
-        '''
-
-
+                      'dedz', dedz)
 
         return result
 
@@ -300,7 +305,7 @@ class Planet():
         5: radius
         '''
         f = np.zeros_like(y)
-        f[0] = (-self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + self.g *           np.sin(y[2])
+        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + self.g *           np.sin(y[2])
         f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3)/(2*self.Q)
         f[2] = (self.g * np.cos(y[2]))/y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y         [0])/(2*y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
