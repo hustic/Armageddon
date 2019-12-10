@@ -4,15 +4,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 earth = Planet(atmos_func='exponential')
-df = earth.solve_atmospheric_entry(10, 20e3, 3000, 1e5, 45)
-df = earth.calculate_energy(df)
+df, dic = earth.impact(10, 20e3, 3000, 1e5, 45)
 print(df)
-#earth.analyse_outcome(df)
-
+print(dic)
 fig = plt.figure(figsize=(7,7))
-plt.plot(df['dedz'], df['altitude'])
-plt.xlabel('dedz')
-plt.ylabel('altitude')
+plt.plot(df['altitude'], df['time'])
+plt.xlabel('altitude')
+plt.ylabel('time')
 #plt.ylim(0,20000)
 plt.grid()
 plt.show()

@@ -143,7 +143,7 @@ o90okl
         """
         result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle)
         result = self.calculate_energy(result)
-        outcome = analyse_outcome(result)
+        outcome = self.analyse_outcome(result)
 
         return result, outcome
 
@@ -216,9 +216,10 @@ o90okl
                 fragmented = True
             else:
                 fragmented = False
+
             y = self.midpoint_implicit_euler(y, self.f, dt, fragmented, density)
             Y.append(y)
-            
+
             if y[3] <= 0:
                 break
 
@@ -294,7 +295,6 @@ o90okl
         # Enter your code here to process the result DataFrame and
         # populate the outcome dictionary.
         outcome = {}
-        event_dict = {}
         event = 0
         index_max = result.dedz.idxmax()
         if result.altitude[index_max] > 0: # check for Airburst
