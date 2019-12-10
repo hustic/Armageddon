@@ -141,9 +141,11 @@ o90okl
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
+        result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle)
+        result = self.calculate_energy(result)
+        outcome = analyse_outcome(result)
 
-        # Enter your code here
-        raise NotImplementedError
+        return result, outcome
 
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
@@ -292,9 +294,10 @@ o90okl
         # Enter your code here to process the result DataFrame and
         # populate the outcome dictionary.
         outcome = {}
-
+        event_dict = {}
+        event = 0
         index_max = result.dedz.idxmax()
-        if result.altitude[index_max] > 0:
+        if result.altitude[index_max] > 0: # check for Airburst
             burst_peak_dedz = result.dedz[index_max]
             burst_altitude = result.altitude[index_max]
             burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
@@ -302,8 +305,10 @@ o90okl
             outcome['burst_peak_dedz'] = burst_peak_dedz
             outcome['burst_altitude'] = burst_altitude
             outcome['burst_total_ke_lost'] = burst_total_ke_lost
-
-        if result.mass.iloc[-1] != 0:
+            
+            event += 1
+    
+        if result.mass.iloc[-1] != 0: # checl for Cratering
             impact_time = result.time.iloc[-1]
             impact_mass = result.mass.iloc[-1]
             impact_speed = result.velocity.iloc[-1]
@@ -311,7 +316,17 @@ o90okl
             outcome['impact_time'] = impact_time
             outcome['impact_mass'] = impact_mass
             outcome['impact_speed'] = impact_speed
-        
+
+            event += 2
+
+        if event == 1:
+            outcome['outcome'] = 'Airburst'
+        elif event == 2:
+            outcome['outcome'] = 'Cratering'
+        elif event == 3:
+            outcome['outcome'] = 'Airburst and cratering'
+        else:
+            raise ValueError
         return outcome
 
     def f(self, y, fragmented, density):
