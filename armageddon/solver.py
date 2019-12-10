@@ -204,9 +204,9 @@ class Planet():
         num_scheme_dict = {
             'explicit euler': self.explicit_euler,
             'implicit euler': self.implicit_euler,
-            'midpoint_implicit_euler': self.midpoint_implicit_euler,
+            'midpoint implicit euler': self.midpoint_implicit_euler,
             'runge kutta': self.runge_kutta
-            }        
+            }
 
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
@@ -227,7 +227,7 @@ class Planet():
             t = t + dt # move up to next timestep
             T_arr.append(t) # store new timestep
 
-            if strength >= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
+            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
                 fragmented = True # define status of fragmentation
             else:
                 fragmented = False
