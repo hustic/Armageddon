@@ -229,7 +229,7 @@ o90okl
                 break
 
         Y = np.array(Y)
-        return pd.DataFrame({'velocity': Y[:, 0],
+        return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
                              'angle': Y[:, 2],
                              'altitude': Y[:, 3],
@@ -256,10 +256,6 @@ o90okl
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-
-        # Replace these lines with your code to add the dedz column to
-        # the result DataFrame
-
         result = result.copy()
 
         dedz = np.zeros((len(result),))
