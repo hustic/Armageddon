@@ -231,7 +231,7 @@ o90okl
         Y = np.array(Y)
 
         if radians is False:
-            Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=1)
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
