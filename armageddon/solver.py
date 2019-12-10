@@ -256,14 +256,14 @@ o90okl
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-        result = result.copy()
+        #result = result.copy()
 
-        dedz = np.zeros((len(result),))
-        dedz[0] = 0
-        for i in range(1,len(result)):
+        dedz = np.zeros((len(result),)) # create array to store dedz results
+        dedz[0] = 0 # initial dedz
+        for i in range(1,len(result)): # loop through all rows of result
             dedz[i] = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 * result.mass[i-1] * result.velocity[i-1]**2)) / (result.altitude[i] - result.altitude[i-1])
-
-        result.insert(len(result.columns), 'dedz', dedz)
+            # get dedz as released energy per altitude
+        result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
         return result
 
@@ -293,32 +293,32 @@ o90okl
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
-        # Enter your code here to process the result DataFrame and
-        # populate the outcome dictionary.
-        outcome = {}
-        event = 0
-        index_max = result.dedz.idxmax()
-        if result.altitude[index_max] > 0: # check for Airburst
-            burst_peak_dedz = result.dedz[index_max]
-            burst_altitude = result.altitude[index_max]
-            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
+        outcome = {} # set empty dictionary
+        event = 0 # set classifying index to zero
 
+        index_max = result.dedz.idxmax() # determine index at which airburst happens
+        if result.altitude[index_max] > 0: # check for Airburst
+            burst_peak_dedz = result.dedz[index_max] # released energy at airbusrt
+            burst_altitude = result.altitude[index_max] # altitude of airburst
+            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
+            # above is: total released energy
+            # add the above three parameters to dictionary below
             outcome['burst_peak_dedz'] = burst_peak_dedz
             outcome['burst_altitude'] = burst_altitude
             outcome['burst_total_ke_lost'] = burst_total_ke_lost
             
-            event += 1
+            event += 1 # increase classifying index to by one
     
-        if result.mass.iloc[-1] != 0: # checl for Cratering
-            impact_time = result.time.iloc[-1]
-            impact_mass = result.mass.iloc[-1]
+        if result.mass.iloc[-1] != 0: # check for Cratering with mass being zero when simulation is finished
+            impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
+            impact_mass = result.mass.iloc[-1] # 
             impact_speed = result.velocity.iloc[-1]
 
             outcome['impact_time'] = impact_time
             outcome['impact_mass'] = impact_mass
             outcome['impact_speed'] = impact_speed
 
-            event += 2
+            event += 2 # increase classifying index to by two
 
         if event == 1:
             outcome['outcome'] = 'Airburst'
