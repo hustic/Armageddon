@@ -1,42 +1,82 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
-def anal_sol(self, radius, velocity, density, strength, angle,
-               init_altitude=100e3, dt=0.05, radians=False):
+def anal_sol(radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
+               init_altitude=100e3, radians=False):
+    '''
+    Solves analytical solution for meteroid impact
+
+    Parameters
+    ----------
+
+    radius : float
+        The radius of the asteroid in meters
+
+    velocity : float
+        The entery speed of the asteroid in meters/second
+
+    density : float
+        The density of the asteroid in kg/m^3
+
+    strength : float
+        The strength of the asteroid (i.e., the ram pressure above which
+        fragmentation and spreading occurs) in N/m^2 (Pa)
+
+    angle : float
+            The initial trajectory angle of the asteroid to the horizontal
+            By default, input is in degrees. If 'radians' is set to True, the
+            input should be in radians
+
+    init_altitude : float, optional
+        Initial altitude in m
+
+    radians : logical, optional
+        Whether angles should be given in degrees or radians. Default=False
+        Angles returned in the DataFrame will have the same units as the
+        input
+    
+
+    Returns
+    -------
+    Result : DataFrame
+            pandas dataFrame with collumns:
+            altitude, velocity, dedz
+
+    '''
     # define constants
     Cd = 1 # drag coefficient
     H = 8000 # atomspheric consatnt
-    rho = 3000 # asteroid density
+    rho = 1.2 # air density at the ground
 
     # define initial conditions
-    velocity = 20e3 # velocity
-    radius = 10 # radius
-    m = 4/3 * np.pi * radius**3 * rho # mass, asteroid to be assumed as spheric shape
-    angle = 45 # angle
-    init_altitude = 100000 # initial height
+
+    m = 4/3 * np.pi * radius**3 * density # mass, asteroid to be assumed as spheric shape
     A = np.pi * radius**2 # cross-sectional area
 
     if radians is False: # converts degrees to radians
         angle = angle * (np.pi)/180
+    
+    # constant in analytical solution
+    c = velocity/(np.exp((-Cd * A * rho * H / (2 * m * np.sin(angle))) * np.exp(-init_altitude/H)))
 
-    # define atomspheric density
-    vv = np.exp((-Cd * A * 1.2 * H / (2 * m * np.sin(angle))) * np.exp(-init_altitude/H))
-    c = velocity / vv # vv is a substitution constant
+    def v_h(h):
+        return c * np.exp((-Cd * A * rho * H / (2 * m * np.sin(angle))) * np.exp(-h/H))
 
-    def v_h(h): 
-        return c * np.exp((-Cd * A * 1.2 * H / (2 * m * np.sin(angle))) * np.exp(-h/H))
-
-    C2 = -Cd * A * 1.2 * H / (2 * m * np.sin(angle))
-
+    C2 = -Cd * A * rho * H / (2 * m * np.sin(angle))
+    
     def dEdz(z):
         return c * np.exp(C2 * np.exp(-z/H)) * C2 * np.exp(-z/H) * (-1/H) * m * v_h(z)
-
-    H_plot = np.linspace(0, 100000, 200)
-    dh = 500
-    E = 0.5 * m * v_h(H_plot)**2
-    de = (E[1:] - E[0:-1]) / dh
-
     
+    H_plot = np.linspace(0, 100000, 200)
+    v_plot=v_h(H_plot)
+    dEdz_plot = dEdz(H_plot)
 
-    #if radians is False:
-     #       Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+    result = pd.DataFrame({'altitude':H_plot,'velocity':v_plot,'dedz':dEdz_plot})
+    result = result.sort_values(by='altitude', ascending=False)
+
+    return result
+
+
+
+   

@@ -2,11 +2,14 @@ from solver import Planet
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from analytical import anal_sol
 
 earth = Planet(atmos_func='exponential')
 df, dic = earth.impact(10, 20e3, 3000, 1e5, 45)
-print(df)
-print(dic)
+#print(df)
+#print(dic)
+anal_df = anal_sol()
+print(anal_df)
 fig = plt.figure(figsize=(7,7))
 plt.plot(df['altitude'], df['time'])
 plt.xlabel('altitude')
