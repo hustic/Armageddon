@@ -24,6 +24,7 @@ And functions can be called in the following example format.
 planet = armageddon.Planet()
 results, outcomes = planet.impact(*insert desired parameters*)
 ```
+Please refer to the documentation found in docs_build/index.html for more detailed descriptions of the functions. 
 
 ### Documentation
 
