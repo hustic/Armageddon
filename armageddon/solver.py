@@ -265,7 +265,9 @@ o90okl
         dedz = np.zeros((len(result),)) # create array to store dedz results
         dedz[0] = 0 # initial dedz
         for i in range(1,len(result)): # loop through all rows of result
-            dedz[i] = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 * result.mass[i-1] * result.velocity[i-1]**2)) / (result.altitude[i] - result.altitude[i-1])
+            energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
+            alt = (result.altitude[i] - result.altitude[i-1])/1e3
+            dedz[i] = energy / alt
             # get dedz as released energy per altitude
         result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
