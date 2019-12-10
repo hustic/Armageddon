@@ -231,7 +231,7 @@ o90okl
         Y = np.array(Y)
 
         if radians is False:
-            Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=1)
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
@@ -265,7 +265,9 @@ o90okl
         dedz = np.zeros((len(result),)) # create array to store dedz results
         dedz[0] = 0 # initial dedz
         for i in range(1,len(result)): # loop through all rows of result
-            dedz[i] = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 * result.mass[i-1] * result.velocity[i-1]**2)) / (result.altitude[i] - result.altitude[i-1])
+            energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
+            alt = (result.altitude[i] - result.altitude[i-1])/1e3
+            dedz[i] = energy / alt
             # get dedz as released energy per altitude
         result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
