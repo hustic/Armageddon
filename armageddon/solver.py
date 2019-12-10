@@ -259,8 +259,7 @@ o90okl
         for i in range(1,len(result)):
             dedz[i] = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 * result.mass[i-1] * result.velocity[i-1]**2)) / (result.altitude[i] - result.altitude[i-1])
 
-        result.insert(len(result.columns),
-                      'dedz', dedz)
+        result.insert(len(result.columns), 'dedz', dedz)
 
         return result
 
@@ -290,22 +289,31 @@ o90okl
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
-        
-        if result.mass[-1] == 0:
-            index_max = result.dedz.idxmax()
+        # Enter your code here to process the result DataFrame and
+        # populate the outcome dictionary.
+        outcome = {}
+
+        index_max = result.dedz.idxmax()
+        if result.altitude[index_max] > 0:
             burst_peak_dedz = result.dedz[index_max]
             burst_altitude = result.altitude[index_max]
-            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - 
-                                (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
-                                
-        elif result.mass[-1] != 0:
+            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
+
+            outcome[
+                'burst_peak_dedz',
+                'burst_altitude',
+                'burst_total_ke_lost'] = burst_peak_dedz, burst_altitude, burst_total_ke_lost
+
+        if result.mass[-1] != 0:
             impact_time = result.time[-1]
             impact_mass = result.mass[-1]
             impact_speed = result.velocity[-1]
 
-        # Enter your code here to process the result DataFrame and
-        # populate the outcome dictionary.
-        outcome = {}
+            outcome[
+                'impact_time',
+                'impact_mass',
+                'impact_speed'] = impact_time, impact_mass, impact_speed
+        
         return outcome
 
     def f(self, y, fragmented, density):
@@ -318,9 +326,9 @@ o90okl
         5: radius
         '''
         f = np.zeros_like(y)
-        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2)/(2 * y[1]) + (self.g *           np.sin(y[2]))
+        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2) / (2 * y[1]) + (self.g * np.sin(y[2]))
         f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / (2 * self.Q)
-        f[2] = (self.g * np.cos(y[2])) / y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 *         y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2]))/(self.Rp + y[3])
+        f[2] = (self.g * np.cos(y[2])) / y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2])) / (self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
         f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
