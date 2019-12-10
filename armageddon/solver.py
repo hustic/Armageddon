@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import os
 class Planet():
     """
     The class called Planet is initialised with constants appropriate
@@ -73,9 +73,14 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            raise NotImplementedError
+            BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+            atmos_filename= os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
+            table = pd.read_csv(atmos_filename,header =None, delim_whitespace=True,skiprows=6)
+            #'Altitude':table.iloc[:,0],'Density':iloc[:,1],'Scale_Height':iloc[:,2]
+            self.rhoa = lambda x: table.iloc[int(x/10),1]*np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
+            
         elif atmos_func == 'mars':
-            raise NotImplementedError
+            self.rhoa = lambda x: 0.699*np.exp(-0.00009*x)/(0.1921*((249.7-0.00222*x)*(x>=7000)+(242.1-0.000998*x)*(x<7000)))
         elif atmos_func == 'constant':
             self.rhoa = lambda x: rho0
         else:
