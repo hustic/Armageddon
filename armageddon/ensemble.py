@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+from scipy.special import erf
 
+from .solver import Planet as planet
 
 def solve_ensemble(
         planet,
@@ -43,19 +45,93 @@ def solve_ensemble(
         airburst altitude
     """
 
+    nval = int(11) # Number of values to sample from
+    N = int(200)  # Choose 500 samples for now
+
+    # Initialize parameter arrays with fiducial values for variables not varied
+    radii = np.full((N,),fiducial_impact['radius'])
+    angles = np.full((N,),fiducial_impact['angle'])
+    strengths = np.full((N,),fiducial_impact['strength'])
+    velocities = np.full((N,),fiducial_impact['velocity'])
+    densities = np.full((N,),fiducial_impact['density'])
+
+    # Dummy values to pass pytest while solver.py not implemented
+    burst_altitudes = np.zeros((N,))
+
+    # Initialize final data array to add varied variables to
+    data = np.zeros((N,))
+
+    # Random sampling given values and respective probabilities
     for var in variables:
-        # Remove these as you implement each distribution
         if var == 'radius':
-            raise NotImplementedError
+            # p(x=X) = 1/4
+            r = np.linspace(rmin,rmax,nval)
+            r_dist = np.full(r.shape,0.25)
+            r_dist = r_dist/np.sum(r_dist) # normalize it to add up to 1
+            radii = np.random.choice(r, size=N, p=r_dist)
+            data = np.vstack((data, radii))
         if var == 'angle':
-            raise NotImplementedError
+            # p(x=X) = d (1-cos^2(X)) / dX = 2 sin(X)cos(X)
+            theta = np.linspace(0,90,nval)
+            theta_dist = 2*np.sin(np.radians(theta))*np.cos(np.radians(theta))
+            theta_dist = theta_dist/np.sum(theta_dist)
+            angles = np.random.choice(theta, size=N, p=theta_dist)
+            data = np.vstack((data, angles))
         if var == 'strength':
-            raise NotImplementedError
+            # p(x=X) = 1/(x*log(10000)), assume log10
+            str = np.linspace(1e3,1e7,nval)
+            # s_CPD = np.log(str/smin) / np.log(smax/smin)
+            s_dist = 1/(str*4)
+            s_dist = s_dist/np.sum(s_dist)
+            strengths = np.random.choice(str, size=N, p=s_dist)
+            data = np.vstack((data, strengths))
         if var == 'velocity':
-            raise NotImplementedError
+            # p(x=X) = (sqrt(2/pi)*exp(-x**2/242)*x**2)/1331
+            v = np.linspace(0,50,nval) # At infinite distance
+            vi = np.sqrt(11.2**2 + v**2) # Impact velocity
+            a = 1.1e4
+            v_dist = (np.sqrt(2/np.pi)*np.exp(-v**2/242)*v**2)/1331
+            v_dist = v_dist/np.sum(v_dist)
+            velocities = np.random.choice(vi, size=N, p=v_dist)
+            data = np.vstack((data, velocities))
+            # v_CPD = erf(v/(a*np.sqrt(2))) \
+                      # - (v/a)*np.exp(-(v**2)/(2*a**2))*np.sqrt(2/np.pi)
         if var == 'density':
-            raise NotImplementedError
+            # p(x=X) = exp(-(x-3e3)**2/2e6)/(1000*sqrt(2*pi))
+            rho = np.linspace(0,7000,nval)
+            rho_dist = np.exp(-(rho-3e3)**2/2e6)/(1000*np.sqrt(2*np.pi))
+            rho_dist = rho_dist/np.sum(rho_dist)
+            densities = np.random.choice(rho,size=N, p=rho_dist)
+            data = np.vstack((data, densities))
+            #rho_CPD = 0.5*(1+erf((rho-3e3)/(1e3*np.sqrt(2))))
 
-    # Implement your ensemble function here
+    # Run the simulation with the above arrays of parameters
+    # Makes an ndarray of result dataframes and an ndarray of outcome dicts
 
-    return pd.DataFrame(columns=variables+['burst_altitude'], index=range(0))
+    """Will uncomment the code below after solver.py fully implemented"""
+#    simulation = np.vectorize(planet.impact)
+
+#    results, outcomes = simulation(radius=radii,angle=angles,
+#                                   strength=strengths,
+#                                   velocity=velocities,density=densities)
+
+    outcomes = []
+
+    for i in range(N):
+        result, outcome = planet.impact(radius=radii[i],angle=angles[i],
+                                        strength=strengths[i],
+                                        velocity=velocities[i],density=densities[i])
+        outcomes.append(outcome)
+
+    # Convert array of dicts into pandas DataFrame
+    outcomes = pd.DataFrame(outcomes)
+
+    # Extract 'burst_altitude' column, cases with no airburst will have NaN
+    burst_altitudes = np.array(outcomes['burst_altitude'])
+
+    data = np.vstack((data, burst_altitudes))
+    data = data[1:,:]
+
+    return pd.DataFrame(data.T, columns=variables+['burst_altitude'])
+
+# def plot_histogram(planet, fiducial_impact, variables): 
