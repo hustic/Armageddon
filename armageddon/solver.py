@@ -229,8 +229,10 @@ o90okl
                 break
 
         Y = np.array(Y)
+
         if radians is False:
             Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
                              'angle': Y[:, 2],
