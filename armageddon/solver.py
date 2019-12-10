@@ -195,32 +195,37 @@ o90okl
         """
 
         # Enter your code here to solve the differential equations
-        if radians is False:
+        if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 120
-        T_arr = []
-        t = 0
-        T_arr.append(0)
-        mass = density * 4/3 * radius**3 * np.pi
-        init_distance = 0
-        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius])
-        Y = []
-        Y.append(y)
+        T = 120 # max duration of simulation in seconds
+        T_arr = [] # list to store the all timesteps
+        t = 0 # inital time assumed to be zero
+        T_arr.append(0) # storing first time
 
-        while t <= T:
-            t = t + dt
-            T_arr.append(t)
+        mass = density * 4/3 * radius**3 * np.pi # defining the mass of astroid assuming a sphere shape
+        init_distance = 0 # intial distance assumed to be zero
+        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius]) # defining initial condition array
+
+        Y = [] # empty list to store solution array for every timestep
+        Y.append(y) # store initial condition
+
+        while t <= T: # initiate timeloop
+            t = t + dt # move up to next timestep
+            T_arr.append(t) # store new timestep
 
             if strength >= (self.rhoa(y[3]) * y[0]**2):
-                fragmented = True
+                fragmented = True # define status of fragmentation
             else:
                 fragmented = False
 
-            y = self.midpoint_implicit_euler(y, self.f, dt, fragmented, density)
-            Y.append(y)
+            y = self.midpoint_implicit_euler(y, self.f, dt, fragmented, density) # compute values for next timestep
+            Y.append(y) #store caomputed values
 
-            if y[3] <= 0:
+            if y[1] <= 0: # stop simulation if mass becomes zero
+                break
+
+            if y[3] <= 0: # stop simulation if mass reaches ground
                 break
 
         Y = np.array(Y)
