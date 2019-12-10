@@ -299,20 +299,18 @@ o90okl
             burst_altitude = result.altitude[index_max]
             burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
 
-            outcome[
-                'burst_peak_dedz',
-                'burst_altitude',
-                'burst_total_ke_lost'] = burst_peak_dedz, burst_altitude, burst_total_ke_lost
+            outcome['burst_peak_dedz'] = burst_peak_dedz
+            outcome['burst_altitude'] = burst_altitude
+            outcome['burst_total_ke_lost'] = burst_total_ke_lost
 
-        if result.mass[-1] != 0:
-            impact_time = result.time[-1]
-            impact_mass = result.mass[-1]
-            impact_speed = result.velocity[-1]
+        if result.mass.iloc[-1] != 0:
+            impact_time = result.time.iloc[-1]
+            impact_mass = result.mass.iloc[-1]
+            impact_speed = result.velocity.iloc[-1]
 
-            outcome[
-                'impact_time',
-                'impact_mass',
-                'impact_speed'] = impact_time, impact_mass, impact_speed
+            outcome['impact_time'] = impact_time
+            outcome['impact_mass'] = impact_mass
+            outcome['impact_speed'] = impact_speed
         
         return outcome
 
