@@ -1,5 +1,5 @@
 import numpy as np
-import solver
+from solver import Planet
 import pandas as pd
 
 data = pd.read_csv('../data/ChelyabinskEnergyAltitude.csv')
