@@ -10,7 +10,7 @@ class Planet():
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='explicit euler'):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='EE'):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -88,7 +88,7 @@ class Planet():
 
     def impact(self, radius, velocity, density, strength, angle,
                init_altitude=100e3, dt=0.05, radians=False,
-               fragmentation=True, num_scheme='explicit euler'):
+               fragmentation=True, num_scheme='EE'):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -157,7 +157,7 @@ class Planet():
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
             init_altitude=100e3, dt=0.05, radians=False,
-            fragmentation=True, num_scheme='explicit euler'):
+            fragmentation=True, num_scheme='EE'):
         """
         Solve the system of differential equations for a given impact scenario
 
@@ -202,10 +202,10 @@ class Planet():
             ``distance``, ``radius``, ``time``
         """
         num_scheme_dict = {
-            'explicit euler': self.explicit_euler,
-            'implicit euler': self.implicit_euler,
-            'midpoint implicit euler': self.midpoint_implicit_euler,
-            'runge kutta': self.runge_kutta
+            'EE': self.explicit_euler,
+            'IE': self.implicit_euler,
+            'MIE': self.midpoint_implicit_euler,
+            'RK': self.runge_kutta
             }
 
         if radians is False: # converts degrees to radians

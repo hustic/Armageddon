@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def anal_sol(radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
+def anal_sol(H_plot, radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
                init_altitude=100e3, radians=False):
     '''
     Solves analytical solution for meteroid impact
@@ -68,7 +68,7 @@ def anal_sol(radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
     def dEdz(z):
         return c * np.exp(C2 * np.exp(-z/H)) * C2 * np.exp(-z/H) * (-1/H) * m * v_h(z)
 
-    H_plot = np.linspace(100000, 0, 200)
+    #H_plot = np.linspace(100000, 0, 200)
     v_plot = v_h(H_plot)
 
     dedz = np.zeros((len(v_plot),)) # create array to store dedz results
