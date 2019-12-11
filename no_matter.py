@@ -8,7 +8,7 @@ import time
 
 def costly_func():
     earth = Planet(atmos_func='exponential', atmos_filename='../data/AltitudeDensityTable.csv')
-    df, out = earth.impact(10, 20e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=True, dt=0.01, init_altitude=80000)
+    df, out = earth.impact(10, 20e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=True, dt=0.05, init_altitude=80000)
     return df, out
 start_time = time.time()
 df, out = costly_func()
