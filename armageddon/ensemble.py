@@ -47,8 +47,8 @@ def solve_ensemble(
         airburst altitude
     """
 
-    nval = int(21) # Number of values to sample from
-    N = int(10000)  # Choose 500 samples for now
+    nval = int(11) # Number of values to sample from
+    N = int(1000)  # Choose 500 samples for now
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -64,19 +64,17 @@ def solve_ensemble(
     data = np.zeros((N,))
 
     # Random sampling given values and respective probabilities
+
     for var in variables:
         if var == 'radius':
-            # p(x=X) = 1/4
-            r = np.linspace(rmin,rmax,nval)
-            r_dist = np.full(r.shape,0.25)
-            r_dist = r_dist/np.sum(r_dist) # normalize it to add up to 1
-            radii = np.random.choice(r, size=N, p=r_dist)
+            # p(x=X) = 1/4, this is a uniform distribution
+            radii = np.random.uniform(rmin, rmax, N)
             data = np.vstack((data, radii))
         if var == 'angle':
             # p(x=X) = d (1-cos^2(X)) / dX = 2 sin(X)cos(X)
             theta = np.linspace(0,90,nval)
             theta_dist = 2*np.sin(np.radians(theta))*np.cos(np.radians(theta))
-            theta_dist = theta_dist/np.sum(theta_dist)
+            theta_dist = theta_dist/np.sum(theta_dist) # normalize it to add up to 1
             angles = np.random.choice(theta, size=N, p=theta_dist)
             data = np.vstack((data, angles))
         if var == 'strength':
@@ -89,10 +87,10 @@ def solve_ensemble(
             data = np.vstack((data, strengths))
         if var == 'velocity':
             # p(x=X) = (sqrt(2/pi)*exp(-x**2/242)*x**2)/1331
-            v = np.linspace(0,50,nval) # At infinite distance
-            vi = np.sqrt(11.2**2 + v**2) # Impact velocity
-            a = 1.1e4
-            v_dist = (np.sqrt(2/np.pi)*np.exp(-v**2/242)*v**2)/1331
+            v = np.linspace(0,50000,nval) # At infinite distance, in m/s
+            vi = np.sqrt(11200**2 + v**2) # Impact velocity, in m/s
+            # a = 1.1e4
+            v_dist = (np.sqrt(2/np.pi)*np.exp(-(v/1000)**2/242)*(v/1000)**2)/1331
             v_dist = v_dist/np.sum(v_dist)
             velocities = np.random.choice(vi, size=N, p=v_dist)
             data = np.vstack((data, velocities))
@@ -111,6 +109,16 @@ def solve_ensemble(
     # Makes an ndarray of result dataframes and an ndarray of outcome dicts
 
     """Will attempt to vectorize or parallelize"""
+
+#    params = np.array([radii,angles,strengths,velocities,densities])
+#    param_df = pd.DataFrame(data=params,columns=['radius','angle','strength',
+#                                               'velocity','density'])
+
+    #simulation = np.vectorize(planet.solve_atmospheric_entry)
+
+    #results, outcomes = simulation(radius=radii,angle=angles,
+    #                               strength=strengths,
+    #                               velocity=velocities,density=densities)
 
     outcomes = []
 
