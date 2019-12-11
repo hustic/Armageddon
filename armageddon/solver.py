@@ -1,16 +1,19 @@
 import numpy as np
 import pandas as pd
+import os
+
+__all__ = ['Planet']
 
 class Planet():
     """
     The class called Planet is initialised with constants appropriate
     for the given target planet, including the atmospheric density profile
-    and other constants
+    and other constants.
     """
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='EE'):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -40,7 +43,7 @@ class Planet():
 
         alpha : float, optional
             Dispersion coefficient
-o90okl
+
         Rp : float, optional
             Planet radius (m)
 
@@ -55,10 +58,8 @@ o90okl
 
         Returns
         -------
-
         None
         """
-
         # Input constants
         self.Cd = Cd
         self.Ch = Ch
@@ -73,16 +74,22 @@ o90okl
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            raise NotImplementedError
+            #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+            #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
+            table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
+            #'Altitude':table.iloc[:,0],'Density':iloc[:,1],'Scale_Height':iloc[:,2]
+            self.rhoa = lambda x: table.iloc[int(x/10),1]*np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
+            
         elif atmos_func == 'mars':
-            raise NotImplementedError
+            self.rhoa = lambda x: 0.699*np.exp(-0.00009*x)/(0.1921*((249.7-0.00222*x)*(x>=7000)+(242.1-0.000998*x)*(x<7000)))
         elif atmos_func == 'constant':
             self.rhoa = lambda x: rho0
         else:
             raise NotImplementedError
 
     def impact(self, radius, velocity, density, strength, angle,
-               init_altitude=100e3, dt=0.05, radians=False):
+               init_altitude=100e3, dt=0.05, radians=False,
+               fragmentation=True, num_scheme='EE'):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -141,7 +148,8 @@ o90okl
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
-        result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle)
+        result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
+        init_altitude, dt, radians, fragmentation, num_scheme)
         result = self.calculate_energy(result)
         outcome = self.analyse_outcome(result)
 
@@ -149,7 +157,8 @@ o90okl
 
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
-            init_altitude=100e3, dt=0.05, radians=False):
+            init_altitude=100e3, dt=0.05, radians=False,
+            fragmentation=True, num_scheme='EE'):
         """
         Solve the system of differential equations for a given impact scenario
 
@@ -193,12 +202,17 @@ o90okl
             ``velocity``, ``mass``, ``angle``, ``altitude``,
             ``distance``, ``radius``, ``time``
         """
+        num_scheme_dict = {
+            'EE': self.explicit_euler,
+            'IE': self.implicit_euler,
+            'MIE': self.midpoint_implicit_euler,
+            'RK': self.runge_kutta
+            }
 
-        # Enter your code here to solve the differential equations
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 120 # max duration of simulation in seconds
+        T = 1200 # max duration of simulation in seconds
         T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
@@ -211,23 +225,25 @@ o90okl
         Y.append(y) # store initial condition
 
         while t <= T: # initiate timeloop
-            t = t + dt # move up to next timestep
-            T_arr.append(t) # store new timestep
-
-            if strength >= (self.rhoa(y[3]) * y[0]**2):
-                fragmented = True # define status of fragmentation
-            else:
-                fragmented = False
-
-            y = self.midpoint_implicit_euler(y, self.f, dt, fragmented, density) # compute values for next timestep
-            Y.append(y) #store caomputed values
-
+            
             if y[1] <= 0: # stop simulation if mass becomes zero
                 break
 
             if y[3] <= 0: # stop simulation if mass reaches ground
                 break
 
+            t = t + dt # move up to next timestep
+            T_arr.append(t) # store new timestep
+
+            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
+                fragmented = True # define status of fragmentation
+            else:
+                fragmented = False
+
+            y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            Y.append(y) #store caomputed values
+
+            
         Y = np.array(Y)
 
         if radians is False:
@@ -260,14 +276,14 @@ o90okl
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-        #result = result.copy()
-
         dedz = np.zeros((len(result),)) # create array to store dedz results
         dedz[0] = 0 # initial dedz
         for i in range(1,len(result)): # loop through all rows of result
             energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
+            if dedz[i] < 0:
+                dedz[i] = 0
             # get dedz as released energy per altitude
         result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
@@ -315,7 +331,7 @@ o90okl
             
             event += 1 # increase classifying index to by one
     
-        if result.mass.iloc[-1] != 0: # check for Cratering with mass being zero when simulation is finished
+        else: # check for Cratering with mass being zero when simulation is finished
             impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
             impact_mass = result.mass.iloc[-1] # 
             impact_speed = result.velocity.iloc[-1]
@@ -352,7 +368,7 @@ o90okl
         f[3] = - y[0] * np.sin(y[2])
         f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
-            f[5] = (7/2 * self.alpha * (self.rhoa(y[3]) / density))**(1/2) * y[0]
+            f[5] = np.sqrt(7/2 * self.alpha * self.rhoa(y[3]) / density) * y[0]
         else:
             f[5] = 0
         return f
@@ -369,4 +385,13 @@ o90okl
     def midpoint_implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
+        return y
+
+    def runge_kutta(self, y, f, dt, fragmented, density):
+        k1 = f(y, fragmented, density) * dt
+        k2 = f(y+k1/2, fragmented, density) * dt
+        k3 = f(y+k2/2, fragmented, density) * dt
+        k4 = f(y+k3, fragmented, density) * dt
+
+        y = y + (k1 + 2 * (k2 + k3) + k4) / 6
         return y

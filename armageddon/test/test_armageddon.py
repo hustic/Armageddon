@@ -101,11 +101,11 @@ def test_analyse_outcome(planet, result):
 
 def test_ensemble(planet, armageddon):
 
-    fiducial_impact = {'radius': 0.0,
-                       'angle': 0.0,
-                       'strength': 0.0,
-                       'velocity': 0.0,
-                       'density': 0.0}
+    fiducial_impact = {'radius': 10.0,
+                       'angle': 45.0,
+                       'strength': 100000.0,
+                       'velocity': 21000.0,
+                       'density': 3000.0}
     
     ensemble = armageddon.ensemble.solve_ensemble(planet,
                                                   fiducial_impact,

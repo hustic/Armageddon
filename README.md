@@ -19,11 +19,14 @@ Module can be imported with
 ```
 >>> import armageddon
 ```
-And functions can be called in the following example format.
+The core functionality is to simulate an asteroid entering the atmosphere. 
+It can be called in the following example format:
 ```
->>> planet = armageddon.Planet()
->>> results, outcomes = planet.impact(*insert desired parameters*)
+>>> earth = armageddon.Planet()
+>>> results, outcomes = earth.impact(radius=,velocity=,density=,strength=,angle=)
 ```
+Where the specified parameter values can be filled in as desired. 
+
 Please refer to the documentation found in docs_build/index.html for more detailed descriptions of the functions. 
 
 ### Documentation
