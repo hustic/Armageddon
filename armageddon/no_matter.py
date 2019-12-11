@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from analytical import anal_sol
 
-earth = Planet(atmos_func='exponential')
+earth = Planet(atmos_func='mars')
 df, out = earth.impact(10, 20e3, 3000, 3000, 45, num_scheme='RK')
 print(df)
 print(out)
@@ -45,8 +45,8 @@ ax1.set_title("RMSs")
 ax1.grid()
 ax1.legend()
 
-ax2.plot(df.velocity, df.altitude, linestyle=':', label='numerical')
-ax2.set_xlabel('velocity', fontsize=14)
+ax2.plot(df.dedz, df.altitude, linestyle=':', label='numerical')
+ax2.set_xlabel('dedz', fontsize=14)
 ax2.set_ylabel('altitude [m]', fontsize=14)
 ax2.set_title("numerical")
 ax2.grid()
