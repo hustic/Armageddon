@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from analytical import anal_sol
 
-earth = Planet(atmos_func='exponential')
-df, out = earth.impact(10, 20e3, 3000, 3000, 45, num_scheme='RK')
+earth = Planet(atmos_func='tabular', atmos_filename='../data/AltitudeDensityTable.csv')
+df, out = earth.impact(10, 20e3, 3000, 3000, 45, num_scheme='RK', init_altitude=80000)
 print(df)
 print(out)
 print(df.altitude)

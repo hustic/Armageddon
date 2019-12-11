@@ -74,9 +74,9 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            BASE_PATH = os.path.dirname(os.path.dirname(__file__))
-            atmos_filename= os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
-            table = pd.read_csv(atmos_filename,header =None, delim_whitespace=True,skiprows=6)
+            #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+            #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
+            table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
             #'Altitude':table.iloc[:,0],'Density':iloc[:,1],'Scale_Height':iloc[:,2]
             self.rhoa = lambda x: table.iloc[int(x/10),1]*np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
             
