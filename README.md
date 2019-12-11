@@ -8,11 +8,26 @@ This tool predicts the fate of asteroids entering Earth’s atmosphere for the p
 
 ### Installation Guide
 
-*To be written*
+After cloning this repository, please install software requirements by running
+```
+pip install -r requirements.txt
+```
 
 ### User instructions
 
-*to be written*
+Module can be imported with
+```
+>>> import armageddon
+```
+The core functionality is to simulate an asteroid entering the atmosphere. 
+It can be called in the following example format:
+```
+>>> earth = armageddon.Planet()
+>>> results, outcomes = earth.impact(radius=,velocity=,density=,strength=,angle=)
+```
+Where the specified parameter values can be filled in as desired. 
+
+Please refer to the documentation found in docs_build/index.html for more detailed descriptions of the functions. 
 
 ### Documentation
 

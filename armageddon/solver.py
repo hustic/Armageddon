@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 import os
+
+__all__ = ['Planet']
+
 class Planet():
     """
     The class called Planet is initialised with constants appropriate
     for the given target planet, including the atmospheric density profile
-    and other constants
+    and other constants.
     """
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
@@ -39,7 +42,7 @@ class Planet():
             Lift coefficient
 
         alpha : float, optional
-            Dispersion coefficient o90okl
+            Dispersion coefficient
 
         Rp : float, optional
             Planet radius (m)
@@ -55,10 +58,8 @@ class Planet():
 
         Returns
         -------
-
         None
         """
-
         # Input constants
         self.Cd = Cd
         self.Ch = Ch

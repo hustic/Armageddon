@@ -4,6 +4,8 @@ from scipy.special import erf
 
 from .solver import Planet as planet
 
+__all__ = ['solve_ensemble']
+
 def solve_ensemble(
         planet,
         fiducial_impact,
@@ -45,8 +47,8 @@ def solve_ensemble(
         airburst altitude
     """
 
-    nval = int(11) # Number of values to sample from
-    N = int(200)  # Choose 500 samples for now
+    nval = int(21) # Number of values to sample from
+    N = int(10000)  # Choose 500 samples for now
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -108,12 +110,7 @@ def solve_ensemble(
     # Run the simulation with the above arrays of parameters
     # Makes an ndarray of result dataframes and an ndarray of outcome dicts
 
-    """Will uncomment the code below after solver.py fully implemented"""
-#    simulation = np.vectorize(planet.impact)
-
-#    results, outcomes = simulation(radius=radii,angle=angles,
-#                                   strength=strengths,
-#                                   velocity=velocities,density=densities)
+    """Will attempt to vectorize or parallelize"""
 
     outcomes = []
 
