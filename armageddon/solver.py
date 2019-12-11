@@ -13,7 +13,7 @@ class Planet():
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='EE'):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK'):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -74,6 +74,7 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
+            assert init_altitude <= 86000
             #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
             #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
             table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
@@ -89,7 +90,7 @@ class Planet():
 
     def impact(self, radius, velocity, density, strength, angle,
                init_altitude=100e3, dt=0.05, radians=False,
-               fragmentation=True, num_scheme='EE'):
+               fragmentation=True, num_scheme='RK'):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -158,7 +159,7 @@ class Planet():
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
             init_altitude=100e3, dt=0.05, radians=False,
-            fragmentation=True, num_scheme='EE'):
+            fragmentation=True, num_scheme='RK'):
         """
         Solve the system of differential equations for a given impact scenario
 
