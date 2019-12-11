@@ -237,7 +237,6 @@ class Planet():
 
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
                 fragmented = True # define status of fragmentation
-                print(y[3], 'fragmentation')
             else:
                 fragmented = False
 
@@ -332,7 +331,7 @@ class Planet():
             
             event += 1 # increase classifying index to by one
     
-        if result.mass.iloc[-1] != 0: # check for Cratering with mass being zero when simulation is finished
+        else: # check for Cratering with mass being zero when simulation is finished
             impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
             impact_mass = result.mass.iloc[-1] # 
             impact_speed = result.velocity.iloc[-1]
