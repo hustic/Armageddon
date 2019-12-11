@@ -211,7 +211,7 @@ class Planet():
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 120 # max duration of simulation in seconds
+        T = 1200 # max duration of simulation in seconds
         T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
@@ -224,23 +224,26 @@ class Planet():
         Y.append(y) # store initial condition
 
         while t <= T: # initiate timeloop
-            t = t + dt # move up to next timestep
-            T_arr.append(t) # store new timestep
-
-            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
-                fragmented = True # define status of fragmentation
-            else:
-                fragmented = False
-
-            y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
-            Y.append(y) #store caomputed values
-
+            
             if y[1] <= 0: # stop simulation if mass becomes zero
                 break
 
             if y[3] <= 0: # stop simulation if mass reaches ground
                 break
 
+            t = t + dt # move up to next timestep
+            T_arr.append(t) # store new timestep
+
+            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
+                fragmented = True # define status of fragmentation
+                print(y[3], 'fragmentation')
+            else:
+                fragmented = False
+
+            y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            Y.append(y) #store caomputed values
+
+            
         Y = np.array(Y)
 
         if radians is False:
@@ -279,6 +282,8 @@ class Planet():
             energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
+            if dedz[i] < 0:
+                dedz[i] = 0
             # get dedz as released energy per altitude
         result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
