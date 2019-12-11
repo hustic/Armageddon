@@ -294,9 +294,15 @@ class Planet():
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
             if dedz[i] < 0:
+<<<<<<< HEAD
                 dedz[i] = 0'''
         #print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
         
+=======
+                dedz[i] = 0
+        print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
+        '''
+>>>>>>> master
         result.insert(len(result.columns), 'dedz', dedz_vec) # add dedz to DataFrame 'result'
 
         return result
