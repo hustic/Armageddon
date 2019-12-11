@@ -74,9 +74,9 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            BASE_PATH = os.path.dirname(os.path.dirname(__file__))
-            atmos_filename= os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
-            table = pd.read_csv(atmos_filename,header =None, delim_whitespace=True,skiprows=6)
+            #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+            #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
+            table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
             #'Altitude':table.iloc[:,0],'Density':iloc[:,1],'Scale_Height':iloc[:,2]
             self.rhoa = lambda x: table.iloc[int(x/10),1]*np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
             
@@ -212,7 +212,7 @@ class Planet():
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 120 # max duration of simulation in seconds
+        T = 1200 # max duration of simulation in seconds
         T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
@@ -225,6 +225,13 @@ class Planet():
         Y.append(y) # store initial condition
 
         while t <= T: # initiate timeloop
+            
+            if y[1] <= 0: # stop simulation if mass becomes zero
+                break
+
+            if y[3] <= 0: # stop simulation if mass reaches ground
+                break
+
             t = t + dt # move up to next timestep
             T_arr.append(t) # store new timestep
 
@@ -236,12 +243,7 @@ class Planet():
             y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
             Y.append(y) #store caomputed values
 
-            if y[1] <= 0: # stop simulation if mass becomes zero
-                break
-
-            if y[3] <= 0: # stop simulation if mass reaches ground
-                break
-
+            
         Y = np.array(Y)
 
         if radians is False:
@@ -280,6 +282,8 @@ class Planet():
             energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
+            if dedz[i] < 0:
+                dedz[i] = 0
             # get dedz as released energy per altitude
         result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
 
@@ -327,7 +331,7 @@ class Planet():
             
             event += 1 # increase classifying index to by one
     
-        if result.mass.iloc[-1] != 0: # check for Cratering with mass being zero when simulation is finished
+        else: # check for Cratering with mass being zero when simulation is finished
             impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
             impact_mass = result.mass.iloc[-1] # 
             impact_speed = result.velocity.iloc[-1]
@@ -364,7 +368,7 @@ class Planet():
         f[3] = - y[0] * np.sin(y[2])
         f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
-            f[5] = (7/2 * self.alpha * (self.rhoa(y[3]) / density))**(1/2) * y[0]
+            f[5] = np.sqrt(7/2 * self.alpha * self.rhoa(y[3]) / density) * y[0]
         else:
             f[5] = 0
         return f
