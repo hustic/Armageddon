@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-#import os
+import matplotlib.pyplot as plt
 
 __all__ = ['Planet']
 
@@ -408,4 +408,45 @@ class Planet():
         y = y + (k1 + 2 * (k2 + k3) + k4) / 6
         return y
 
-    #def plot_results(self, result):
+    def plot_results(self, result):
+        fig = plt.figure(figsize=(12, 8))
+        fig.tight_layout()
+        ax1 = plt.subplot(321)
+        ax2 = plt.subplot(322)
+        ax3 = plt.subplot(323)
+        ax4 = plt.subplot(324)
+        ax5 = plt.subplot(325)
+        ax6 = plt.subplot(326)
+
+        ax1.scatter(result.altitude, result.time, marker='.', color='r')
+        #ax1.set_xlabel('altitude [m]')
+        ax1.set_ylabel('time [s]')
+        ax1.grid()
+
+        ax2.scatter(result.altitude, result.velocity, marker='.', color='r')
+        #ax2.set_xlabel('altitude [m]')
+        ax2.set_ylabel('velocity [m/s]')
+        ax2.grid()
+        
+        ax3.scatter(result.altitude, result.dedz, marker='.', color='r')
+        #ax3.set_xlabel('altitude [m]')
+        ax3.set_ylabel('dedz [kT-TNT/km]')
+        ax3.grid()
+        
+        ax4.scatter(result.altitude, result.mass, marker='.', color='r')
+        #ax4.set_xlabel('altitude [m]')
+        ax4.set_ylabel('mass [kg]')
+        ax4.grid()
+        
+        ax5.scatter(result.altitude, result.radius, marker='.', color='r')
+        ax5.set_xlabel('altitude [m]')
+        ax5.set_ylabel('radius [m]')
+        ax5.grid()
+        
+        ax6.scatter(result.altitude, result.angle, marker='.', color='r')
+        ax6.set_xlabel('altitude [m]')
+        ax6.set_ylabel('angle [°]')
+        ax6.grid()
+
+        plt.show()
+        

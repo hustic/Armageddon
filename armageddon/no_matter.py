@@ -8,7 +8,9 @@ df, out = earth.impact(1, 10e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=F
 
 anal_df = anal_sol(np.array(df.altitude), 1, 10e3, 3000, 10e5, 45)
 
-fig = plt.figure(figsize=(8, 8))
+earth.plot_results(df)
+
+'''fig = plt.figure(figsize=(8, 8))
 ax1 = plt.subplot(211)
 ax2 = plt.subplot(212)
 
@@ -26,4 +28,4 @@ ax2.set_xlabel('dedz')
 ax2.grid()
 ax2.legend()
 
-plt.show()
+plt.show()'''
