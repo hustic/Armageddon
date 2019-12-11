@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.special import erf
+import dask
 
 from .solver import Planet as planet
 
@@ -123,13 +124,14 @@ def solve_ensemble(
     outcomes = []
 
     for i in range(N):
-        result, outcome = planet.impact(radius=radii[i],angle=angles[i],
+        result, outcome = dask.delayed(planet.impact, nout=2)(radius=radii[i],angle=angles[i],
                                         strength=strengths[i],
                                         velocity=velocities[i],density=densities[i])
         outcomes.append(outcome)
 
+    results = dask.compute(*outcomes)
     # Convert array of dicts into pandas DataFrame
-    outcomes = pd.DataFrame(outcomes)
+    outcomes = pd.DataFrame(results)
 
     # Extract 'burst_altitude' column, cases with no airburst will have NaN
     burst_altitudes = np.array(outcomes['burst_altitude'])
