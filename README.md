@@ -28,7 +28,7 @@ This functionality can be called in the following example format:
 >>> results, outcomes = planet.impact(radius=10,velocity=2.1e4,density=3e3,strength=1e5,angle=45)
 ```
 Where the specified parameters can be changed as desired. This outputs a pandas DataFrame of the parameters and loss of kinetic energy at each timestep, and a dictionary containing an analysis of the scenario.
-Please refer to the documentation at ./docs_build/index.html for more information about choosing input parameters.
+Please refer to the documentation in the `index.html` file under the `docs_build` directory for more information about choosing input parameters.
 After running the simulation, some basic plots can be generated using:
 ```
 >>> insert text here
