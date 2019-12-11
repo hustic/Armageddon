@@ -247,7 +247,7 @@ class Planet():
         Y = np.array(Y)
 
         if radians is False:
-            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=1)
+            Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
@@ -294,15 +294,9 @@ class Planet():
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
             if dedz[i] < 0:
-<<<<<<< HEAD
                 dedz[i] = 0'''
         #print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
         
-=======
-                dedz[i] = 0
-        print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
-        '''
->>>>>>> master
         result.insert(len(result.columns), 'dedz', dedz_vec) # add dedz to DataFrame 'result'
 
         return result
@@ -349,7 +343,7 @@ class Planet():
             
             event += 1 # increase classifying index to by one
     
-        else: # check for Cratering with mass being zero when simulation is finished
+        if result.altitude[index_max] <= 5000: # check for Cratering with mass being zero when simulation is finished
             impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
             impact_mass = result.mass.iloc[-1] # 
             impact_speed = result.velocity.iloc[-1]
