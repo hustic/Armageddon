@@ -369,7 +369,7 @@ class Planet():
         f[3] = - y[0] * np.sin(y[2])
         f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
-            f[5] = (7/2 * self.alpha * (self.rhoa(y[3]) / density))**(1/2) * y[0]
+            f[5] = np.sqrt(7/2 * self.alpha * self.rhoa(y[3]) / density) * y[0]
         else:
             f[5] = 0
         return f
