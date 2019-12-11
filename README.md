@@ -8,14 +8,14 @@ This tool predicts the fate of asteroids entering Earth’s atmosphere for the p
 
 ### Installation Guide
 
-After cloning this repository, please install software requirements by running
+To install the module using pip, please run
 ```
-pip install -r requirements.txt
+pip install git+https://github.com/acse-2019/acse-4-armageddon-mathilde.git
 ```
 
 ### User instructions
 
-Module can be imported with
+The module can be imported with
 ```
 >>> import armageddon
 ```
@@ -27,7 +27,8 @@ This functionality can be called in the following example format:
 >>> planet = armageddon.Planet(atmos_func='exponential')
 >>> results, outcomes = planet.impact(radius=10,velocity=2.1e4,density=3e3,strength=1e5,angle=45)
 ```
-Where the specified parameters can be changed as desired. Please refer to the documentation at ./docs_build/index.html for more information about choosing input parameters.
+Where the specified parameters can be changed as desired. This outputs a pandas DataFrame of the parameters and loss of kinetic energy at each timestep, and a dictionary containing an analysis of the scenario.
+Please refer to the documentation at ./docs_build/index.html for more information about choosing input parameters.
 After running the simulation, some basic plots can be generated using:
 ```
 >>> insert text here
@@ -68,7 +69,7 @@ Then following the instructions to process the `Armageddon.tex` file in the `lat
 
 ### Testing
 
-The tool includes several tests, which you can use to checki its operation on your system. With [pytest](https://doc.pytest.org/en/latest) installed, these can be run with
+The tool includes a fully automated testing suite, which you can use to check its operation on your system. With [pytest](https://doc.pytest.org/en/latest) installed, these can be run with
 
 ```
 python -m pytest armageddon
