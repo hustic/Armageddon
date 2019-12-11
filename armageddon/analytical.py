@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def anal_sol(radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
+def anal_sol(H_plot, radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
                init_altitude=100e3, radians=False):
     '''
     Solves analytical solution for meteroid impact
@@ -67,16 +67,19 @@ def anal_sol(radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
     
     def dEdz(z):
         return c * np.exp(C2 * np.exp(-z/H)) * C2 * np.exp(-z/H) * (-1/H) * m * v_h(z)
-    
-    H_plot = np.linspace(0, 100000, 200)
-    v_plot=v_h(H_plot)
-    dEdz_plot = dEdz(H_plot)
 
-    result = pd.DataFrame({'altitude':H_plot,'velocity':v_plot,'dedz':dEdz_plot})
-    result = result.sort_values(by='altitude', ascending=False)
+    #H_plot = np.linspace(100000, 0, 200)
+    v_plot = v_h(H_plot)
+
+    dedz = np.zeros((len(v_plot),)) # create array to store dedz results
+    dedz[0] = 0 # initial dedz
+    for i in range(1,len(v_plot)): # loop through all rows of result
+            energy = ((1/2 * m * v_plot[i]**2) - (1/2 * m * v_plot[i-1]**2))/4.184e12
+            alt = (H_plot[i] - H_plot[i-1])/1e3
+            dedz[i] = energy / alt
+    #dEdz_plot = dedz(H_plot)
+
+    result = pd.DataFrame({'altitude':H_plot, 'velocity':v_plot, 'dedz':dedz})
+    #result = result.sort_values(by='altitude', ascending=False)
 
     return result
-
-
-
-   
