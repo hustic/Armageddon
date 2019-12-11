@@ -276,16 +276,28 @@ class Planet():
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-        dedz = np.zeros((len(result),)) # create array to store dedz results
-        dedz[0] = 0 # initial dedz
+        dedz_vec = np.zeros(len(result)) # create array to store dedz results
+        velocity = np.array(result.velocity)
+        mass = np.array(result.mass)
+        altitude = np.array(result.altitude)
+
+        # get dedz as released energy per altitude
+        ke = ((1/2 * mass[1:] * velocity[1:]**2) - (1/2 * mass[:-1] * velocity[:-1]**2)) / 4.184e12
+        alt = (altitude[1:] - altitude[:-1]) / 1e3 # get kinetic energy and altitude differnces between timesteps
+        dedz_vec[1:] = ke / alt # devide energy over altitude, note the first entry stays zero
+        i = np.where(dedz_vec < 0) # turn all negative value to zero
+        dedz_vec[i] = 0
+        '''
+        dedz = np.zeros(len(result)) # create array to store dedz results
         for i in range(1,len(result)): # loop through all rows of result
             energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
             alt = (result.altitude[i] - result.altitude[i-1])/1e3
             dedz[i] = energy / alt
             if dedz[i] < 0:
-                dedz[i] = 0
-            # get dedz as released energy per altitude
-        result.insert(len(result.columns), 'dedz', dedz) # add dedz to DataFrame 'result'
+                dedz[i] = 0'''
+        #print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
+        
+        result.insert(len(result.columns), 'dedz', dedz_vec) # add dedz to DataFrame 'result'
 
         return result
 
