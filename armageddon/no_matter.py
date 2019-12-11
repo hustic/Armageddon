@@ -12,7 +12,7 @@ fig = plt.figure(figsize=(8, 8))
 ax1 = plt.subplot(211)
 ax2 = plt.subplot(212)
 
-ax1.scatter(df.altitude, df.velocity, label='numeric', marker='.', color='r')
+ax1.scatter(df.altitude, df.angle, label='numeric', marker='.', color='r')
 ax1.plot(anal_df.altitude, anal_df.velocity, label='analytic', color='b')
 ax1.set_ylabel('altitude')
 ax1.set_xlabel('velocity')

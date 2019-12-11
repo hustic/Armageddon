@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os
+#import os
 
 __all__ = ['Planet']
 
@@ -247,7 +247,7 @@ class Planet():
         Y = np.array(Y)
 
         if radians is False:
-            Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
@@ -407,3 +407,5 @@ class Planet():
 
         y = y + (k1 + 2 * (k2 + k3) + k4) / 6
         return y
+
+    #def plot_results(self, result):
