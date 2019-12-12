@@ -28,7 +28,7 @@ This functionality can be called in the following example format:
 >>> results, outcomes = planet.impact(radius=10,velocity=2.1e4,density=3e3,strength=1e5,angle=45)
 ```
 Where the specified parameters can be changed as desired. This outputs a pandas DataFrame of the parameters and loss of kinetic energy at each timestep, and a dictionary containing an analysis of the scenario.
-Please refer to the documentation in the `index.html` file under the `docs_build` directory for more information about choosing input parameters.
+Please refer to the [documentation](./docs_build/index.html) in the `index.html` file under the `docs_build` directory for more information about choosing input parameters.
 After running the simulation, some basic plots can be generated using:
 ```
 >>> insert text here
@@ -41,13 +41,13 @@ This can be done in the following format:
 >>> planet = armageddon.Planet(atmos_func='exponential')
 >>> fiducial_impact = {'radius': 10.0,
                        'angle': 45.0,
-					   'strength': 100000.0,
+'strength': 100000.0,
                        'velocity': 21000.0,
                        'density': 3000.0}
 >>> ensemble = armageddon.ensemble.solve_ensemble(planet,fiducial_impact,variables=[],rmin=8,rmax=12)
 ```
 Where the parameters and fiducial values can be specified, as well as the input variables to be varied.
-For more information regarding the use of this functionality, please refer to the documentation.
+For more information regarding the use of this functionality, please refer to the [documentation](./docs_build/index.html).
 
 ### Documentation
 
