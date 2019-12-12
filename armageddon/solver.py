@@ -204,7 +204,7 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
-            'RKA': self.adaptive_RK,
+            #'RKA': self.adaptive_RK,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -387,10 +387,7 @@ class Planet():
 
     def explicit_euler(self, y, f, dt, fragmented, density):
         y1 = y + f(y, fragmented, density) * dt
-        return y1
-
-    def adaptive_RK():
-        
+        return y1        
 
     def implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
@@ -402,7 +399,7 @@ class Planet():
         y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
         return y
 
-    def adaptive_RK(:)
+    #def adaptive_RK(:)
 
     def runge_kutta(self, y, f, dt, fragmented, density):
         k1 = f(y, fragmented, density) * dt
