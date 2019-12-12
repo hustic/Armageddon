@@ -13,7 +13,7 @@ class Planet():
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK'):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -97,7 +97,7 @@ class Planet():
 
     def impact(self, radius, velocity, density, strength, angle,
                init_altitude=100e3, dt=0.05, radians=False,
-               fragmentation=True, num_scheme='RK'):
+               fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -177,7 +177,7 @@ class Planet():
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
             init_altitude=100e3, dt=0.05, radians=False,
-            fragmentation=True, num_scheme='RK'):
+            fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Solve the system of differential equations for a given impact scenario
 
@@ -231,6 +231,7 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
+            # 'RKA': self.adaptive_RK,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -239,7 +240,7 @@ class Planet():
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 1200 # max duration of simulation in seconds
+        T = 12000 # max duration of simulation in seconds
         T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
@@ -249,34 +250,34 @@ class Planet():
         init_distance = 0 # intial distance assumed to be zero
         # defining initial condition array
         y = np.array([velocity, mass, angle, init_altitude, init_distance, radius])
-
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
-
-        ke0 = 1/2 * mass * y[0]**2
-
         while t <= T: # initiate timeloop
-            # define status of fragmentation
+            
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
-                fragmented = True
+                fragmented = True # define status of fragmentation
             else:
                 fragmented = False
-            # compute values for next timestep
-            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density)
+
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+
+            # for purpose of ensemble: break after airburst
+            if ensemble is True:
+                if y[2] > (89 * np.pi/180):
+                    break
             # stop simulation if mass or altitude become zero
             if y_next[1] <= 0 or y_next[3] <= 0:
                 break
-            t = t + dt # move up to next timestep
+            t += dt
             T_arr.append(t) # store new timestep
 
-            Y.append(y_next) #store computed values
+            Y.append(y_next) #store caomputed values
             y = y_next
-
         Y = np.array(Y)
-
         if radians is False:
             Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
+        # return all the stored values in pd.DataFrame
         return pd.DataFrame({'velocity': Y[:, 0],
                              'mass': Y[:, 1],
                              'angle': Y[:, 2],
@@ -311,13 +312,12 @@ class Planet():
 
         # get dedz as released energy per altitude
         ke = ((1/2 * mass[1:] * velocity[1:]**2) - (1/2 * mass[:-1] \
-               * velocity[:-1]**2)) / 4.184e12
+                                                    * velocity[:-1]**2)) / 4.184e12
         # get kinetic energy and altitude differnces between timesteps
         alt = (altitude[1:] - altitude[:-1]) / 1e3
-        # divide energy over altitude, note the first entry stays zero
+        # devide energy over altitude, note the first entry stays zero
         dedz_vec[1:] = ke / alt
-        # turn all negative value to zero
-        i = np.where(dedz_vec < 0)
+        i = np.where(dedz_vec < 0) # turn all negative value to zero
         dedz_vec[i] = 0
         # add dedz to DataFrame 'result'
         result.insert(len(result.columns), 'dedz', dedz_vec)
@@ -358,9 +358,8 @@ class Planet():
             burst_peak_dedz = result.dedz[index_max] # released energy at airbusrt
             burst_altitude = result.altitude[index_max] # altitude of airburst
             # total released energy
-            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) \
-                                  - (result.mass[index_max] \
-                                     * result.velocity[index_max]**2))
+            burst_total_ke_lost = (1/2 * ((result.mass[0] * result.velocity[0]**2) \
+                  - (result.mass[index_max] * result.velocity[index_max]**2))) / 4.184e12
             # add the above three parameters to dictionary below
             outcome['burst_peak_dedz'] = burst_peak_dedz
             outcome['burst_altitude'] = burst_altitude
@@ -392,12 +391,12 @@ class Planet():
         return outcome
 
     def f(self, y, fragmented, density):
-        #0: velocity
-        #1: mass
-        #2: angle
-        #3: altitude
-        #4: distance
-        #5: radius
+        # 0: velocity
+        # 1: mass
+        # 2: angle
+        # 3: altitude
+        # 4: distance
+        # 5: radius
         f = np.zeros_like(y)
         f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2) / (2 * y[1]) + (self.g * np.sin(y[2]))
         f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / (2 * self.Q)
@@ -411,9 +410,18 @@ class Planet():
         return f
 
     def explicit_euler(self, y, f, dt, fragmented, density):
-        y = y + f(y, fragmented, density) * dt
-        return y
-        
+        y1 = y + f(y, fragmented, density) * dt
+        return y1
+
+    def recursiv_explicit_euler(self, y, f, dt, fragmented, density, dif, velocity):
+        i = 0
+        if dif > (2000):
+            while i <= 4:
+                i += 1
+                y = self.explicit_euler(y, f, dt, fragmented, density)
+            return y
+        return self.explicit_euler(y, f, dt, fragmented, density)
+
     def implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + f(y_dummy, fragmented, density) * dt
@@ -492,4 +500,3 @@ class Planet():
 
         fig.suptitle('Simulation Results') # single title for all subplots
         plt.show()
-        

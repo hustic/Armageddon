@@ -13,7 +13,7 @@ def solve_ensemble(
         variables,
         radians=False,
         rmin=8, rmax=12,
-        N=int(200)):
+        N=int(200),nval=int(11)):
     """
     Run asteroid simulation for a distribution of initial conditions and
     find the burst distribution
@@ -44,6 +44,9 @@ def solve_ensemble(
         Number of times to sample input parameters and, correspondingly, number
         of times the simulation is run.
 
+    nval : int, optional
+        Number of possible input values from given range to sample from.
+
     Returns
     -------
 
@@ -51,8 +54,6 @@ def solve_ensemble(
         DataFrame with columns of any parameters that are varied and the
         airburst altitude
     """
-
-    nval = int(11) # Number of input values to sample from
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -112,11 +113,11 @@ def solve_ensemble(
             data.append(densities)
 
     # Create array of input parameters
-    params = np.array([radii, angles, strengths, velocities, densities])
+    params = np.array([radii, velocities, densities, strengths, angles])
 
     # Run parallelized simulation
     dask.config.set(scheduler='processes')
-    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, num_scheme='EE') for x in params.T]
+    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, num_scheme='EE', ensemble=True) for x in params.T]
     results = [dask.delayed(planet.calculate_energy)(lazy) for lazy in lazies]
     outcomes = [dask.delayed(planet.analyse_outcome)(result) for result in results]
     outcomes = dask.compute(*outcomes)
