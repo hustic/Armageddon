@@ -56,6 +56,14 @@ class Planet():
         H : float, optional
             Atmospheric scale height (m)
 
+        fragmentation : boolean, optional
+            If set to false, asteroid does not fragment and keeps its shape.
+
+        num_scheme : string, optional
+            Set the numerical scheme with which to perform the ODE solver.
+            Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
+            Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
+
         Returns
         -------
         None
@@ -71,18 +79,17 @@ class Planet():
         self.H = H
         self.rho0 = rho0
 
+        # Set up atmospheric density function
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            assert init_altitude <= 86000
-            #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
-            #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
-            table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
-            #'Altitude':table.iloc[:,0],'Density':iloc[:,1],'Scale_Height':iloc[:,2]
-            self.rhoa = lambda x: table.iloc[int(x/10),1]*np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
-            
+            table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True,
+                                skiprows=6)
+            self.rhoa = lambda x: table.iloc[int(x/10),1] \
+                        *np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
         elif atmos_func == 'mars':
-            self.rhoa = lambda x: 0.699*np.exp(-0.00009*x)/(0.1921*((249.7-0.00222*x)*(x>=7000)+(242.1-0.000998*x)*(x<7000)))
+            self.rhoa = lambda x: 0.699*np.exp(-0.00009*x)/(0.1921*((249.7-0.00222*x) \
+                        *(x>=7000)+(242.1-0.000998*x)*(x<7000)))
         elif atmos_func == 'constant':
             self.rhoa = lambda x: rho0
         else:
@@ -128,6 +135,14 @@ class Planet():
             Angles returned in the DataFrame will have the same units as the
             input
 
+        fragmentation : boolean, optional
+            If set to false, asteroid does not fragment and keeps its shape.
+
+        num_scheme : string, optional
+            Set the numerical scheme with which to perform the ODE solver.
+            Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
+            Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
+
         Returns
         -------
 
@@ -149,8 +164,11 @@ class Planet():
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
-        result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
-        init_altitude, dt, radians, fragmentation, num_scheme)
+        # Call the solver and analysis functions
+        result = self.solve_atmospheric_entry(radius, velocity, density, 
+                                              strength, angle, init_altitude,
+                                              dt, radians, fragmentation,
+                                              num_scheme)
         result = self.calculate_energy(result)
         outcome = self.analyse_outcome(result)
 
@@ -195,6 +213,14 @@ class Planet():
             Angles returned in the DataFrame will have the same units as the
             input
 
+        fragmentation : boolean, optional
+            If set to false, asteroid does not fragment and keeps its shape.
+
+        num_scheme : string, optional
+            Set the numerical scheme with which to perform the ODE solver.
+            Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
+            Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
+
         Returns
         -------
         Result : DataFrame
@@ -218,45 +244,46 @@ class Planet():
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
 
-        mass = density * 4/3 * radius**3 * np.pi # defining the mass of astroid assuming a sphere shape
+        # defining the mass of astroid assuming a sphere shape
+        mass = density * 4/3 * radius**3 * np.pi
         init_distance = 0 # intial distance assumed to be zero
-        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius]) # defining initial condition array
+        # defining initial condition array
+        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius])
 
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
 
+        ke0 = 1/2 * mass * y[0]**2
+
         while t <= T: # initiate timeloop
-            
-            if y[1] <= 0: # stop simulation if mass becomes zero
+            # define status of fragmentation
+            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
+                fragmented = True
+            else:
+                fragmented = False
+            # compute values for next timestep
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density)
+            # stop simulation if mass or altitude become zero
+            if y_next[1] <= 0 or y_next[3] <= 0:
                 break
-
-            if y[3] <= 0: # stop simulation if mass reaches ground
-                break
-
             t = t + dt # move up to next timestep
             T_arr.append(t) # store new timestep
 
-            if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
-                fragmented = True # define status of fragmentation
-            else:
-                fragmented = False
+            Y.append(y_next) #store computed values
+            y = y_next
 
-            y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
-            Y.append(y) #store caomputed values
-
-            
         Y = np.array(Y)
 
         if radians is False:
             Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
-        return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
+        return pd.DataFrame({'velocity': Y[:, 0],
                              'mass': Y[:, 1],
                              'angle': Y[:, 2],
                              'altitude': Y[:, 3],
                              'distance': Y[:, 4],
                              'radius': Y[:, 5],
-                             'time': T_arr})#, index=range(1))
+                             'time': T_arr})
 
     def calculate_energy(self, result):
         """
@@ -277,34 +304,23 @@ class Planet():
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-
-        dedz_vec = np.array([0])
+        dedz_vec = np.zeros(len(result)) # create array to store dedz results
         velocity = np.array(result.velocity)
         mass = np.array(result.mass)
         altitude = np.array(result.altitude)
 
-
-        ke = ((1/2 * mass[1:] * velocity[1:]**2) - (1/2 * mass[:-1] * velocity[:-1]**2)) / 4.184e12
-        alt = (altitude[1:] - altitude[:-1]) / 1e3 # get kinetic energy and altitude differnces between timesteps
-        d = ke/alt
-        dedz_vec = np.concatenate((dedz_vec, d)) # devide energy over altitude, note the first entry stays zero
-        #i = np.where(dedz_vec < 0) # turn all negative value to zero
-        #dedz_vec[i] = 0
-
-        '''
-        dedz = np.zeros(len(result)) # create array to store dedz results
-        for i in range(1,len(result)): # loop through all rows of result
-            energy = ((1/2 * result.mass[i] * result.velocity[i]**2) - (1/2 *result.mass[i-1] * result.velocity[i-1]**2))/4.184e12
-            alt = (result.altitude[i] - result.altitude[i-1])/1e3
-            dedz[i] = energy / alt
-            if dedz[i] < 0:
-                dedz[i] = 0'''
-        #print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
-
-        #print(result)
-        #print(dedz_vec)
-        result['dedz'] = dedz_vec # add dedz to DataFrame 'result'
-
+        # get dedz as released energy per altitude
+        ke = ((1/2 * mass[1:] * velocity[1:]**2) - (1/2 * mass[:-1] \
+               * velocity[:-1]**2)) / 4.184e12
+        # get kinetic energy and altitude differnces between timesteps
+        alt = (altitude[1:] - altitude[:-1]) / 1e3
+        # divide energy over altitude, note the first entry stays zero
+        dedz_vec[1:] = ke / alt
+        # turn all negative value to zero
+        i = np.where(dedz_vec < 0)
+        dedz_vec[i] = 0
+        # add dedz to DataFrame 'result'
+        result.insert(len(result.columns), 'dedz', dedz_vec)
 
         return result
 
@@ -341,18 +357,22 @@ class Planet():
         if result.altitude[index_max] > 0: # check for Airburst
             burst_peak_dedz = result.dedz[index_max] # released energy at airbusrt
             burst_altitude = result.altitude[index_max] # altitude of airburst
-            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
-            # above is: total released energy
+            # total released energy
+            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) \
+                                  - (result.mass[index_max] \
+                                     * result.velocity[index_max]**2))
             # add the above three parameters to dictionary below
             outcome['burst_peak_dedz'] = burst_peak_dedz
             outcome['burst_altitude'] = burst_altitude
             outcome['burst_total_ke_lost'] = burst_total_ke_lost
-            
+
             event += 1 # increase classifying index to by one
-    
-        if result.altitude[index_max] <= 5000: # check for Cratering with mass being zero when simulation is finished
-            impact_time = result.time.iloc[-1] # difference in seconds between entering atmosphere and impact
-            impact_mass = result.mass.iloc[-1] # 
+
+        # check for Cratering with mass being zero when simulation is finished
+        if result.altitude[index_max] <= 5000:
+            # difference in seconds between entering atmosphere and impact
+            impact_time = result.time.iloc[-1]
+            impact_mass = result.mass.iloc[-1]
             impact_speed = result.velocity.iloc[-1]
 
             outcome['impact_time'] = impact_time
@@ -372,14 +392,12 @@ class Planet():
         return outcome
 
     def f(self, y, fragmented, density):
-        '''
-        0: velocity
-        1: mass
-        2: angle
-        3: altitude
-        4: distance
-        5: radius
-        '''
+        #0: velocity
+        #1: mass
+        #2: angle
+        #3: altitude
+        #4: distance
+        #5: radius
         f = np.zeros_like(y)
         f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2) / (2 * y[1]) + (self.g * np.sin(y[2]))
         f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / (2 * self.Q)
@@ -416,43 +434,62 @@ class Planet():
         return y
 
     def plot_results(self, result):
+        """
+        Generate basic plots of the results of the simulation against altitude
+
+        Parameters
+        ----------
+
+        result : DataFrame
+            pandas DataFrame with velocity, mass, angle, altitude, horizontal
+            distance, radius and dedz as a function of time
+
+        Returns
+        -------
+
+        Figure 1 : plot
+            matplotlib plot with 6 subplots of time, velocity, dedz, mass, radius and
+            angle versus altitude
+        """
         fig = plt.figure(figsize=(12, 8))
         fig.tight_layout()
-        ax1 = plt.subplot(321)
-        ax2 = plt.subplot(322)
-        ax3 = plt.subplot(323)
-        ax4 = plt.subplot(324)
-        ax5 = plt.subplot(325)
-        ax6 = plt.subplot(326)
+        ax1 = plt.subplot(231)
+        ax2 = plt.subplot(232)
+        ax3 = plt.subplot(233)
+        ax4 = plt.subplot(234)
+        ax5 = plt.subplot(235)
+        ax6 = plt.subplot(236)
 
-        ax1.scatter(result.altitude, result.time, marker='.', color='r')
-        #ax1.set_xlabel('altitude [m]')
-        ax1.set_ylabel('time [s]')
+        ax1.scatter(result.time, result.altitude, marker='.', color='r')
+        ax1.set_ylabel('altitude [m]')
+        ax1.set_xlabel('time [s]')
         ax1.grid()
 
-        ax2.scatter(result.altitude, result.velocity, marker='.', color='r')
-        #ax2.set_xlabel('altitude [m]')
-        ax2.set_ylabel('velocity [m/s]')
+        ax2.scatter(result.velocity, result.altitude, marker='.', color='r')
+        ax2.set_xlabel('velocity [m/s]')
+        ax2.set_yticklabels([])
         ax2.grid()
-        
-        ax3.scatter(result.altitude, result.dedz, marker='.', color='r')
-        #ax3.set_xlabel('altitude [m]')
-        ax3.set_ylabel('dedz [kT-TNT/km]')
+
+        ax3.scatter(result.dedz, result.altitude, marker='.', color='r')
+        ax3.set_xlabel('dedz [kT-TNT/km]')
+        ax3.set_yticklabels([])
         ax3.grid()
-        
-        ax4.scatter(result.altitude, result.mass, marker='.', color='r')
-        #ax4.set_xlabel('altitude [m]')
-        ax4.set_ylabel('mass [kg]')
+
+        ax4.scatter(result.mass, result.altitude, marker='.', color='r')
+        ax4.set_ylabel('altitude [m]')
+        ax4.set_xlabel('mass [kg]')
         ax4.grid()
-        
-        ax5.scatter(result.altitude, result.radius, marker='.', color='r')
-        ax5.set_xlabel('altitude [m]')
-        ax5.set_ylabel('radius [m]')
+
+        ax5.scatter(result.radius, result.altitude, marker='.', color='r')
+        ax5.set_xlabel('radius [m]')
+        ax5.set_yticklabels([])
         ax5.grid()
-        
-        ax6.scatter(result.altitude, result.angle, marker='.', color='r')
-        ax6.set_xlabel('altitude [m]')
-        ax6.set_ylabel('angle [degrees]')
+
+        ax6.scatter(result.angle, result.altitude, marker='.', color='r')
+        ax6.set_xlabel('angle [degrees]')
+        ax6.set_yticklabels([])
         ax6.grid()
 
+        fig.suptitle('Simulation Results') # single title for all subplots
         plt.show()
+        
