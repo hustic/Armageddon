@@ -235,8 +235,20 @@ class Planet():
             if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
                 break
 
-            dif = abs((y_next[0] - y[0]) / y_next[0])
-            dt = dt * (1 - dif)
+            '''
+            dif_ke = abs(((1/2 * y_next[1] * y_next[0]**2) - (1/2 * y[1] * y[0]**2)))
+            dif_alt = abs((y_next[3] - y[3]))
+            dif = dif_ke/dif_alt
+
+            if dif > 1:
+                dif = 1
+            dt = dt * (1 + 0.2-dif)
+            if dt > 0.2:
+                dt = 0.2
+            if dt < 0.01:
+                dt = 0.01
+            print(dt)'''
+
             t = t + dt # move up to next timestep
             T_arr.append(t) # store new timestep
 
