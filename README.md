@@ -84,6 +84,6 @@ This software is published under the [MIT license](./LICENSE).
 
 ### References
 
-Popova, O. P., Jenniskens, P., Emel’yanenko, V., Kartashova, A., Biryukov, E., Khaibrakhmanov, S., ... & Badyukov, D. D. (2013). Chelyabinsk airburst, damage assessment, meteorite recovery, and characterization. Science, 342(6162), 1069-1073.
-
 Brown, P. G., Assink, J. D., Astiz, L., Blaauw, R., Boslough, M. B., Borovička, J., ... & Cooke, W. D. (2013). A 500-kiloton airburst over Chelyabinsk and an enhanced hazard from small impactors. Nature, 503(7475), 238.
+
+Popova, O. P., Jenniskens, P., Emel’yanenko, V., Kartashova, A., Biryukov, E., Khaibrakhmanov, S., ... & Badyukov, D. D. (2013). Chelyabinsk airburst, damage assessment, meteorite recovery, and characterization. Science, 342(6162), 1069-1073.
