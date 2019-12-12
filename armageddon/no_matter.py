@@ -18,7 +18,7 @@ earth = Planet()
 print(sci_res)'''
 
 start_time = time.time()
-df, out = earth.impact(10, 20e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=True)
+df, out = earth.impact(10, 20e3, 3000, 10e5, 81, num_scheme='RK', fragmentation=True, dt=0.05, ensemble=False)
 print(df, out)
 print(time.time() - start_time)
 

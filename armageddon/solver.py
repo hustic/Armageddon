@@ -13,7 +13,7 @@ class Planet():
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK'):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -89,7 +89,7 @@ class Planet():
 
     def impact(self, radius, velocity, density, strength, angle,
                init_altitude=100e3, dt=0.05, radians=False,
-               fragmentation=True, num_scheme='RK'):
+               fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -149,7 +149,7 @@ class Planet():
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
         result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
-        init_altitude, dt, radians, fragmentation, num_scheme)
+        init_altitude, dt, radians, fragmentation, num_scheme, ensemble)
         result = self.calculate_energy(result)
         outcome = self.analyse_outcome(result)
 
@@ -158,7 +158,7 @@ class Planet():
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
             init_altitude=100e3, dt=0.05, radians=False,
-            fragmentation=True, num_scheme='RK'):
+            fragmentation=True, num_scheme='RK', ensemble=False):
         """
         Solve the system of differential equations for a given impact scenario
 
@@ -204,6 +204,7 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
+            'RE': self.recursiv_explicit_euler,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -212,7 +213,7 @@ class Planet():
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
-        T = 1200 # max duration of simulation in seconds
+        T = 12000 # max duration of simulation in seconds
         T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
         T_arr.append(0) # storing first time
@@ -220,12 +221,11 @@ class Planet():
         mass = density * 4/3 * radius**3 * np.pi # defining the mass of astroid assuming a sphere shape
         init_distance = 0 # intial distance assumed to be zero
         y = np.array([velocity, mass, angle, init_altitude, init_distance, radius]) # defining initial condition array
-
+        D = []
+        D.append(0)
+        dif = 0
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
-
-        ke0 = 1/2 * mass * y[0]**2
-
         while t <= T: # initiate timeloop
             
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
@@ -233,27 +233,18 @@ class Planet():
             else:
                 fragmented = False
 
-            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
-            if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
+            if num_scheme == 'RE':
+                y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density, dif, velocity) # compute values for next timestep
+            else:
+                y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            if ensemble is True and y[2] > (89 * np.pi/180): # for purpose of ensemble: break after airburst
                 break
 
-            
-            '''dif_ke = abs(((1/2 * y_next[1] * y_next[0]**2) - (1/2 * y[1] * y[0]**2)))
-            dif_alt = abs((y_next[3] - y[3]))
-            dif = dif_ke/dif_alt 
-
-            print(dif)
-            
-            if dif > 1:
-                dif = 1
-            dt = dt * (1 + 0.2-dif)
-            if dt > 0.2:
-                dt = 0.2
-            if dt < 0.01:
-                dt = 0.01
-            print(dt)'''
-
-            t = t + dt # move up to next timestep
+            if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
+                break
+            dif = abs((y_next[0] - y[0]) / dt)
+            D.append(dif)
+            t += dt
             T_arr.append(t) # store new timestep
 
             Y.append(y_next) #store caomputed values
@@ -261,7 +252,8 @@ class Planet():
 
             
         Y = np.array(Y)
-
+        fig = plt.figure(figsize=(5, 5))
+        plt.plot(Y[:, 3],D)
         if radians is False:
             Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
@@ -402,9 +394,30 @@ class Planet():
         return f
 
     def explicit_euler(self, y, f, dt, fragmented, density):
-        y = y + f(y, fragmented, density) * dt
-        return y
+        y1 = y + f(y, fragmented, density) * dt
+        return y1
         
+    def recursiv_explicit_euler(self, y, f, dt, fragmented, density, dif, velocity):
+        i = 0
+        if dif > (2000):
+            while i <= 4:
+                i += 1
+                y = self.explicit_euler(y, f, dt, fragmented, density)
+            return y
+        return self.explicit_euler(y, f, dt, fragmented, density)
+
+        '''c = dt/2
+        y1 = self.explicit_euler(y, f, dt, fragmented, density)
+        yc = self.explicit_euler(y, f, c, fragmented, density)
+        y2 = self.explicit_euler(yc, f, c, fragmented, density)
+        err = abs(y[0] - y2[0])
+        print(err)
+        tol = 8000
+        if err < tol:
+            return y2
+
+        return self.recursiv_explicit_euler(y, f, c, fragmented, density)'''
+
     def implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + f(y_dummy, fragmented, density) * dt
