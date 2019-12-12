@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os
+import matplotlib.pyplot as plt
 
 __all__ = ['Planet']
 
@@ -13,7 +13,7 @@ class Planet():
 
     def __init__(self, atmos_func='exponential', atmos_filename=None,
                  Cd=1., Ch=0.1, Q=1e7, Cl=1e-3, alpha=0.3, Rp=6371e3,
-                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='EE'):
+                 g=9.81, H=8000., rho0=1.2, fragmentation=True, num_scheme='RK'):
         """
         Set up the initial parameters and constants for the target planet
 
@@ -74,6 +74,7 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
+            assert init_altitude <= 86000
             #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
             #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
             table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
@@ -89,7 +90,7 @@ class Planet():
 
     def impact(self, radius, velocity, density, strength, angle,
                init_altitude=100e3, dt=0.05, radians=False,
-               fragmentation=True, num_scheme='EE'):
+               fragmentation=True, num_scheme='RK'):
         """
         Solve the system of differential equations for a given impact event.
         Also calculates the kinetic energy lost per unit altitude and
@@ -158,7 +159,7 @@ class Planet():
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
             init_altitude=100e3, dt=0.05, radians=False,
-            fragmentation=True, num_scheme='EE'):
+            fragmentation=True, num_scheme='RK'):
         """
         Solve the system of differential equations for a given impact scenario
 
@@ -247,7 +248,7 @@ class Planet():
         Y = np.array(Y)
 
         if radians is False:
-            Y[:, 2] = list(map(lambda x: x * 180/np.pi, Y[:, 2]))
+            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
@@ -413,3 +414,46 @@ class Planet():
 
         y = y + (k1 + 2 * (k2 + k3) + k4) / 6
         return y
+
+    def plot_results(self, result):
+        fig = plt.figure(figsize=(12, 8))
+        fig.tight_layout()
+        ax1 = plt.subplot(321)
+        ax2 = plt.subplot(322)
+        ax3 = plt.subplot(323)
+        ax4 = plt.subplot(324)
+        ax5 = plt.subplot(325)
+        ax6 = plt.subplot(326)
+
+        ax1.scatter(result.altitude, result.time, marker='.', color='r')
+        #ax1.set_xlabel('altitude [m]')
+        ax1.set_ylabel('time [s]')
+        ax1.grid()
+
+        ax2.scatter(result.altitude, result.velocity, marker='.', color='r')
+        #ax2.set_xlabel('altitude [m]')
+        ax2.set_ylabel('velocity [m/s]')
+        ax2.grid()
+        
+        ax3.scatter(result.altitude, result.dedz, marker='.', color='r')
+        #ax3.set_xlabel('altitude [m]')
+        ax3.set_ylabel('dedz [kT-TNT/km]')
+        ax3.grid()
+        
+        ax4.scatter(result.altitude, result.mass, marker='.', color='r')
+        #ax4.set_xlabel('altitude [m]')
+        ax4.set_ylabel('mass [kg]')
+        ax4.grid()
+        
+        ax5.scatter(result.altitude, result.radius, marker='.', color='r')
+        ax5.set_xlabel('altitude [m]')
+        ax5.set_ylabel('radius [m]')
+        ax5.grid()
+        
+        ax6.scatter(result.altitude, result.angle, marker='.', color='r')
+        ax6.set_xlabel('altitude [m]')
+        ax6.set_ylabel('angle [°]')
+        ax6.grid()
+
+        plt.show()
+        

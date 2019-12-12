@@ -48,8 +48,10 @@ def solve_ensemble(
         airburst altitude
     """
 
+
     nval = int(51) # Number of values to sample from
     N = int(100)  # Choose 500 samples for now
+
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -111,15 +113,13 @@ def solve_ensemble(
 
     """Will attempt to vectorize or parallelize"""
 
-#    params = np.array([radii,angles,strengths,velocities,densities])
-#    param_df = pd.DataFrame(data=params,columns=['radius','angle','strength',
-#                                               'velocity','density'])
+    # params = np.array([radii,angles,strengths,velocities,densities])
+    # param_df = pd.DataFrame(data=params,columns=['radius','angle','strength',
+                                                 # 'velocity','density'])
 
-    #simulation = np.vectorize(planet.solve_atmospheric_entry)
-
-    #results, outcomes = simulation(radius=radii,angle=angles,
-    #                               strength=strengths,
-    #                               velocity=velocities,density=densities)
+    # param_df['atm_entry'] = 
+    # param_df
+    # param_df['outcomes'] = 
 
     outcomes = []
     params = np.array([radii, angles, strengths, velocities, densities])
