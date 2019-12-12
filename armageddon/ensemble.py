@@ -14,7 +14,7 @@ def solve_ensemble(
         variables,
         radians=False,
         rmin=8, rmax=12,
-        N=int(10000),nval=int(21)):
+        N=int(10000), nval=int(21)):
     """
     Run asteroid simulation for a distribution of initial conditions and
     find the burst distribution
@@ -57,11 +57,11 @@ def solve_ensemble(
     """
 
     # Initialize parameter arrays with fiducial values for variables not varied
-    radii = np.full((N,),fiducial_impact['radius'])
-    angles = np.full((N,),fiducial_impact['angle'])
-    strengths = np.full((N,),fiducial_impact['strength'])
-    velocities = np.full((N,),fiducial_impact['velocity'])
-    densities = np.full((N,),fiducial_impact['density'])
+    radii = np.full((N,), fiducial_impact['radius'])
+    angles = np.full((N,), fiducial_impact['angle'])
+    strengths = np.full((N,), fiducial_impact['strength'])
+    velocities = np.full((N,), fiducial_impact['velocity'])
+    densities = np.full((N,), fiducial_impact['density'])
 
     # Dummy values to pass pytest while solver.py not implemented
     burst_altitudes = np.zeros((N,))
@@ -80,7 +80,7 @@ def solve_ensemble(
         if var == 'angle':
             # p(x=X) = d (1-cos^2(X)) / dX = 2 sin(X)cos(X)
             # range of possible input values
-            theta = np.linspace(0,90,nval)
+            theta = np.linspace(0, 90, nval)
             # calculate probabilities corresponding to every possible input value
             theta_dist = 2*np.sin(np.radians(theta))*np.cos(np.radians(theta))
             theta_dist = theta_dist/np.sum(theta_dist) # normalize it to add up to 1
@@ -90,7 +90,7 @@ def solve_ensemble(
         # Repeat process for other input parameters
         if var == 'strength':
             # p(x=X) = 1/(x*log(10000)), assume log10
-            str = np.linspace(1e3,1e7,nval)
+            str = np.linspace(1e3, 1e7, nval)
             s_dist = 1/(str*4)
             s_dist = s_dist/np.sum(s_dist)
             strengths = np.random.choice(str, size=N, p=s_dist)
@@ -98,7 +98,7 @@ def solve_ensemble(
 
         if var == 'velocity':
             # p(x=X) = (sqrt(2/pi)*exp(-x**2/242)*x**2)/1331
-            v = np.linspace(0,50000,nval) # At infinite distance, in m/s
+            v = np.linspace(0, 50000, nval) # At infinite distance, in m/s
             vi = np.sqrt(11200**2 + v**2) # Impact velocity, in m/s
             v_dist = (np.sqrt(2/np.pi)*np.exp(-(v/1000)**2/242)*(v/1000)**2)/1331
             v_dist = v_dist/np.sum(v_dist)
@@ -107,10 +107,10 @@ def solve_ensemble(
 
         if var == 'density':
             # p(x=X) = exp(-(x-3e3)**2/2e6)/(1000*sqrt(2*pi))
-            rho = np.linspace(1,7001,nval)
+            rho = np.linspace(1, 7001, nval)
             rho_dist = np.exp(-(rho-3e3)**2/2e6)/(1000*np.sqrt(2*np.pi))
             rho_dist = rho_dist/np.sum(rho_dist)
-            densities = np.random.choice(rho,size=N, p=rho_dist)
+            densities = np.random.choice(rho, size=N, p=rho_dist)
             data.append(densities)
 
     # Create array of input parameters
@@ -118,7 +118,8 @@ def solve_ensemble(
 
     # Run parallelized simulation
     dask.config.set(scheduler='processes')
-    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, num_scheme='EE', ensemble=True) for x in params.T]
+    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, num_scheme='EE', ensemble=True)
+              for x in params.T]
     results = [dask.delayed(planet.calculate_energy)(lazy) for lazy in lazies]
     outcomes = [dask.delayed(planet.analyse_outcome)(result) for result in results]
     outcomes = dask.compute(*outcomes)
@@ -140,7 +141,7 @@ def plot_burst_altitude(ensemble):
 
     ensemble : DataFrame
         pandas DataFrame with specified varied parameters and simulated burst
-        altitudes. 
+        altitudes.
 
     Returns
     -------

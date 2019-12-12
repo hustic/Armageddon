@@ -88,11 +88,11 @@ class Planet():
         elif atmos_func == 'tabular':
             table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True,
                                 skiprows=6)
-            self.rhoa = lambda x: table.iloc[int(x/10),1] \
-                        *np.exp((table.iloc[int(x/10),0]-x)/table.iloc[int(x/10),2])
+            self.rhoa = lambda x: table.iloc[int(x/10), 1] \
+                        *np.exp((table.iloc[int(x/10), 0]-x)/table.iloc[int(x/10), 2])
         elif atmos_func == 'mars':
             self.rhoa = lambda x: 0.699*np.exp(-0.00009*x)/(0.1921*((249.7-0.00222*x) \
-                        *(x>=7000)+(242.1-0.000998*x)*(x<7000)))
+                        *(x >= 7000)+(242.1-0.000998*x)*(x < 7000)))
         elif atmos_func == 'constant':
             self.rhoa = lambda x: rho0
         else:
@@ -171,7 +171,7 @@ class Planet():
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
         # Call the solver and analysis functions
-        result = self.solve_atmospheric_entry(radius, velocity, density, 
+        result = self.solve_atmospheric_entry(radius, velocity, density,
                                               strength, angle, init_altitude,
                                               dt, radians, fragmentation,
                                               num_scheme)
@@ -261,13 +261,14 @@ class Planet():
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
         while t <= T: # initiate timeloop
-            
+
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
                 fragmented = True # define status of fragmentation
             else:
                 fragmented = False
 
-            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            # compute values for next timestep
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density)
 
             # for purpose of ensemble: break after airburst
             if ensemble is True:
@@ -407,9 +408,12 @@ class Planet():
         # 4: distance
         # 5: radius
         f = np.zeros_like(y)
-        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2) / (2 * y[1]) + (self.g * np.sin(y[2]))
-        f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / (2 * self.Q)
-        f[2] = (self.g * np.cos(y[2])) / y[0]  - (self.Cl * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2])) / (self.Rp + y[3])
+        f[0] = - (self.Cd * self.rhoa(y[3]) * y[0]**2 * np.pi * y[5]**2) / \
+            (2 * y[1]) + (self.g * np.sin(y[2]))
+        f[1] = - (self.Ch * self.rhoa(y[3]) * np.pi * y[5]**2 * y[0]**3) / \
+            (2 * self.Q)
+        f[2] = (self.g * np.cos(y[2])) / y[0]  - (self.Cl * self.rhoa(y[3]) \
+            * np.pi * y[5]**2 * y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2])) / (self.Rp + y[3])
         f[3] = - y[0] * np.sin(y[2])
         f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / self.Rp)
         if fragmented == True:
@@ -423,20 +427,11 @@ class Planet():
         y1 = y + f(y, fragmented, density) * dt
         return y1
 
-    def recursiv_explicit_euler(self, y, f, dt, fragmented, density, dif, velocity):
-        i = 0
-        if dif > (2000):
-            while i <= 4:
-                i += 1
-                y = self.explicit_euler(y, f, dt, fragmented, density)
-            return y
-        return self.explicit_euler(y, f, dt, fragmented, density)
-
     def implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + f(y_dummy, fragmented, density) * dt
         return y
-        
+
     def midpoint_implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
