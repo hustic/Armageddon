@@ -1,4 +1,5 @@
-# Armageddon - Atmospheric Entry and Disruption of Asteroids
+# Armageddon Tool
+## Atmospheric Entry and Disruption of Asteroids
 
 Asteroids entering Earth’s atmosphere are subject to extreme drag forces that decelerate, heat and disrupt the space rocks. The fate of an asteroid is a complex function of its initial mass, speed, trajectory angle and internal strength. 
 
@@ -41,7 +42,7 @@ This can be done in the following format:
 >>> planet = armageddon.Planet(atmos_func='exponential')
 >>> fiducial_impact = {'radius': 10.0,
                        'angle': 45.0,
-		   'strength': 100000.0,
+		     'strength': 100000.0,
                        'velocity': 21000.0,
                        'density': 3000.0}
 >>> ensemble = armageddon.ensemble.solve_ensemble(planet,fiducial_impact,variables=[],rmin=8,rmax=12)
@@ -78,3 +79,7 @@ python -m pytest armageddon
 ### License
 
 This software is published under the [MIT license](./LICENSE).
+
+### References
+
+
