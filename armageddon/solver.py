@@ -224,6 +224,8 @@ class Planet():
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
 
+        ke0 = 1/2 * mass * y[0]**2
+
         while t <= T: # initiate timeloop
             
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
@@ -235,11 +237,13 @@ class Planet():
             if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
                 break
 
-            '''
-            dif_ke = abs(((1/2 * y_next[1] * y_next[0]**2) - (1/2 * y[1] * y[0]**2)))
+            
+            '''dif_ke = abs(((1/2 * y_next[1] * y_next[0]**2) - (1/2 * y[1] * y[0]**2)))
             dif_alt = abs((y_next[3] - y[3]))
-            dif = dif_ke/dif_alt
+            dif = dif_ke/dif_alt 
 
+            print(dif)
+            
             if dif > 1:
                 dif = 1
             dt = dt * (1 + 0.2-dif)
