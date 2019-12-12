@@ -41,7 +41,7 @@ This can be done in the following format:
 >>> planet = armageddon.Planet(atmos_func='exponential')
 >>> fiducial_impact = {'radius': 10.0,
                        'angle': 45.0,
-			'strength': 100000.0,
+		   'strength': 100000.0,
                        'velocity': 21000.0,
                        'density': 3000.0}
 >>> ensemble = armageddon.ensemble.solve_ensemble(planet,fiducial_impact,variables=[],rmin=8,rmax=12)
