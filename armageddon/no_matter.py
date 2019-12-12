@@ -11,21 +11,23 @@ strength = [3000, 10e5]
 angle = [30, 45]
 density = [1200, 3000]
 
-earth = Planet()
+earth = Planet(atmos_func='tabular', atmos_filename='../data/AltitudeDensityTable.csv')
 #df_vec, out_vec = earth.impact(radius, velocity, density, strength, angle, num_scheme='RK', fragmentation=True)
 
-sci_res = scipy_test.sci_sol()
-print(sci_res)
+'''sci_res = scipy_test.sci_sol()
+print(sci_res)'''
 
 '''start_time = time.time()
 df, out = earth.impact(10, 20e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=True)
 print(df, out)
-print(time.time() - start_time)
-'''
+print(time.time() - start_time)'''
+
+df, out = earth.impact(10, 20e3, 3000, 10e5, 45, num_scheme='RK', fragmentation=True)
+
 #print(df.altitude)
 #anal_df = anal_sol(np.array(df.altitude), 1, 10e3, 3000, 10e5, 45)
 
-#earth.plot_results(df)
+earth.plot_results(df)
 
 '''fig = plt.figure(figsize=(8, 8))
 ax1 = plt.subplot(211)

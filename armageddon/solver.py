@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import dask
 
 __all__ = ['Planet']
 
@@ -75,7 +74,6 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            assert init_altitude <= 86000
             #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
             #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
             table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
@@ -150,26 +148,12 @@ class Planet():
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
-
-        '''
-        dask.config.set(scheduler='processes')
-        lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x) for x in params.T]
-        results = [dask.delayed(planet.calculate_energy)(lazy) for lazy in lazies]
-        outcomes = [dask.delayed(planet.analyse_outcome)(result) for result in results]
-        bursts = [o['burst_altitude'] for o in outcomes]
-
-        #dask.visualize(bursts)
-        bursts = dask.compute(*bursts)
-        '''
-        dask.config.set(scheduler='processes')
-
-        result1 = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
+        result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
         init_altitude, dt, radians, fragmentation, num_scheme)
-        result2 = self.calculate_energy(result1)
-        #result = dask.compute(result2)
-        outcome = self.analyse_outcome(result2)
-        #outcome = dask.compute()
-        return result2, outcome
+        result = self.calculate_energy(result)
+        outcome = self.analyse_outcome(result)
+
+        return result, outcome
 
     def solve_atmospheric_entry(
             self, radius, velocity, density, strength, angle,
@@ -229,44 +213,41 @@ class Planet():
             angle = angle * (np.pi)/180
 
         T = 1200 # max duration of simulation in seconds
-        #T_arr = [] # list to store the all timesteps
+        T_arr = [] # list to store the all timesteps
         t = 0 # inital time assumed to be zero
-        #T_arr.append(0) # storing first time
+        T_arr.append(0) # storing first time
 
         mass = density * 4/3 * radius**3 * np.pi # defining the mass of astroid assuming a sphere shape
         init_distance = 0 # intial distance assumed to be zero
-        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius, t]) # defining initial condition array
+        y = np.array([velocity, mass, angle, init_altitude, init_distance, radius]) # defining initial condition array
 
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
 
-        Co = 0.7 # Co = v * dt/dx
-
-        while y[-1] <= T: # initiate timeloop
+        while t <= T: # initiate timeloop
             
-            if y[1] <= 0 or y[3] <= 0: # stop simulation if mass becomes zero
-                break
-
-            #dt = # dt = Co * dx/v
-
-            y[-1] = dask.delayed(y[-1] + dt) # move up to next timestep
-            #T_arr.append(t) # store new timestep
-
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
                 fragmented = True # define status of fragmentation
             else:
                 fragmented = False
 
-            y = dask.delayed(num_scheme_dict[num_scheme])(y, self.f, dt, fragmented, density) # compute values for next timestep
-            y = dask.compute(y)
-            Y.append(y) #store computed values
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
+                break
+
+            dif = abs((y_next[0] - y[0]) / y_next[0])
+            dt = dt * (1 - dif)
+            t = t + dt # move up to next timestep
+            T_arr.append(t) # store new timestep
+
+            Y.append(y_next) #store caomputed values
+            y = y_next
 
             
-        
-        Y = dask.compute(Y, scheduler='threat')
         Y = np.array(Y)
+
         if radians is False:
-            Y[:, 2] = np.round_(Y[:, 2] * 180/np.pi, decimals=10) #np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
+            Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
         return pd.DataFrame({'velocity': Y[:, 0], # return all the stored values in pd.DataFrame
                              'mass': Y[:, 1],
@@ -274,7 +255,7 @@ class Planet():
                              'altitude': Y[:, 3],
                              'distance': Y[:, 4],
                              'radius': Y[:, 5],
-                             'time': Y[:, 6]})#, index=range(1))
+                             'time': T_arr})#, index=range(1))
 
     def calculate_energy(self, result):
         """
