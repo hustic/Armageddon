@@ -1,5 +1,4 @@
-# Armageddon Tool
-## Atmospheric Entry and Disruption of Asteroids
+## Armageddon Tool - Atmospheric Entry and Disruption of Asteroids
 
 Asteroids entering Earth’s atmosphere are subject to extreme drag forces that decelerate, heat and disrupt the space rocks. The fate of an asteroid is a complex function of its initial mass, speed, trajectory angle and internal strength. 
 
@@ -30,6 +29,7 @@ This functionality can be called in the following example format:
 ```
 Where the specified parameters can be changed as desired. This outputs a pandas DataFrame of the parameters and loss of kinetic energy at each timestep, and a dictionary containing an analysis of the scenario.
 Please refer to the [documentation](./docs_build/index.html) in the `index.html` file under the `docs_build` directory for more information about choosing input parameters.
+
 After running the simulation, some basic plots can be generated using:
 ```
 >>> insert text here
