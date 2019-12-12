@@ -40,6 +40,10 @@ def solve_ensemble(
         Maximum radius, in m, to use in the ensemble calculation,
         if radius is one of the parameters to be varied.
 
+    N : int, optional
+        Number of times to sample input parameters and, correspondingly, number
+        of times the simulation is run.
+
     Returns
     -------
 
@@ -49,7 +53,6 @@ def solve_ensemble(
     """
 
     nval = int(11) # Number of input values to sample from
-    N = int(200)  # Choose number of samples
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -70,13 +73,19 @@ def solve_ensemble(
             # p(x=X) = 1/4, this is a uniform distribution
             radii = np.random.uniform(rmin, rmax, N) # uniform random sampling
             data.append(radii)
+
+        # For non-uniform probability distributions, use np.random.choice
         if var == 'angle':
             # p(x=X) = d (1-cos^2(X)) / dX = 2 sin(X)cos(X)
-            theta = np.linspace(0,90,nval) # range of possible input values
+            # range of possible input values
+            theta = np.linspace(0,90,nval)
+            # calculate probabilities corresponding to every possible input value
             theta_dist = 2*np.sin(np.radians(theta))*np.cos(np.radians(theta))
             theta_dist = theta_dist/np.sum(theta_dist) # normalize it to add up to 1
             angles = np.random.choice(theta, size=N, p=theta_dist) # sampling
             data.append(angles)
+
+        # Repeat process for other input parameters
         if var == 'strength':
             # p(x=X) = 1/(x*log(10000)), assume log10
             str = np.linspace(1e3,1e7,nval)
@@ -84,6 +93,7 @@ def solve_ensemble(
             s_dist = s_dist/np.sum(s_dist)
             strengths = np.random.choice(str, size=N, p=s_dist)
             data.append(strengths)
+
         if var == 'velocity':
             # p(x=X) = (sqrt(2/pi)*exp(-x**2/242)*x**2)/1331
             v = np.linspace(0,50000,nval) # At infinite distance, in m/s
@@ -92,6 +102,7 @@ def solve_ensemble(
             v_dist = v_dist/np.sum(v_dist)
             velocities = np.random.choice(vi, size=N, p=v_dist)
             data.append(velocities)
+
         if var == 'density':
             # p(x=X) = exp(-(x-3e3)**2/2e6)/(1000*sqrt(2*pi))
             rho = np.linspace(1,7001,nval)
@@ -117,3 +128,33 @@ def solve_ensemble(
     # Convert to array and return in pandas DataFrame
     data = np.array(data)
     return pd.DataFrame(data.T, columns=variables+['burst_altitude'])
+
+def plot_ensemble(ensemble):
+    """
+    Generate histogram plots for input parameters and burst altitude
+
+    Parameters
+    ----------
+
+    ensemble : DataFrame
+        pandas DataFrame with specified varied parameters and simulated burst
+        altitudes. 
+
+    Returns
+    -------
+
+    Figure 1 : plot
+        matplotlib plot of histograms of input parameters and burst altitudes.
+    """
+    fig = plt.figure(figsize=(12, 8))
+    fig.tight_layout()
+    ax1 = plt.subplot(321)
+    ax2 = plt.subplot(322)
+    ax3 = plt.subplot(323)
+    ax4 = plt.subplot(324)
+    ax5 = plt.subplot(325)
+    ax6 = plt.subplot(326)
+
+    burst_altitude = np.array(ensemble['burst_altitude'])
+    
+    plt.show()
