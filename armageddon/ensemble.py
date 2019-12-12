@@ -48,7 +48,7 @@ def solve_ensemble(
     """
 
     nval = int(11) # Number of values to sample from
-    N = int(1000)  # Choose 500 samples for now
+    N = int(100)  # Choose number of samples
 
     # Initialize parameter arrays with fiducial values for variables not varied
     radii = np.full((N,),fiducial_impact['radius'])
@@ -98,7 +98,7 @@ def solve_ensemble(
                       # - (v/a)*np.exp(-(v**2)/(2*a**2))*np.sqrt(2/np.pi)
         if var == 'density':
             # p(x=X) = exp(-(x-3e3)**2/2e6)/(1000*sqrt(2*pi))
-            rho = np.linspace(0,7000,nval)
+            rho = np.linspace(1,7001,nval)
             rho_dist = np.exp(-(rho-3e3)**2/2e6)/(1000*np.sqrt(2*np.pi))
             rho_dist = rho_dist/np.sum(rho_dist)
             densities = np.random.choice(rho,size=N, p=rho_dist)
@@ -110,15 +110,13 @@ def solve_ensemble(
 
     """Will attempt to vectorize or parallelize"""
 
-#    params = np.array([radii,angles,strengths,velocities,densities])
-#    param_df = pd.DataFrame(data=params,columns=['radius','angle','strength',
-#                                               'velocity','density'])
+    # params = np.array([radii,angles,strengths,velocities,densities])
+    # param_df = pd.DataFrame(data=params,columns=['radius','angle','strength',
+                                                 # 'velocity','density'])
 
-    #simulation = np.vectorize(planet.solve_atmospheric_entry)
-
-    #results, outcomes = simulation(radius=radii,angle=angles,
-    #                               strength=strengths,
-    #                               velocity=velocities,density=densities)
+    # param_df['atm_entry'] = 
+    # param_df
+    # param_df['outcomes'] = 
 
     outcomes = []
 
