@@ -64,6 +64,9 @@ class Planet():
             Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
             Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
 
+        ensemble : boolean, optional
+            For the ensemble tool. Set True to stop simulation after airburst.
+
         Returns
         -------
         None
@@ -143,6 +146,9 @@ class Planet():
             Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
             Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
 
+        ensemble : boolean, optional
+            For the ensemble tool. Set True to stop simulation after airburst.
+
         Returns
         -------
 
@@ -220,6 +226,9 @@ class Planet():
             Set the numerical scheme with which to perform the ODE solver.
             Default is Runge-Kutta 4, ``RK``. Options are Explicit Euler ``EE``,
             Implicit Euler ``IE`` and Midpoint Implicit Euler ``MIE``.
+
+        ensemble : boolean, optional
+            For the ensemble tool. Set True to stop simulation after airburst.
 
         Returns
         -------

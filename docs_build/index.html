@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Project 2: Armageddon - Atmospheric entry and disruption of asteroids &#8212; Armageddon  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -129,133 +127,124 @@ km altitude), is shown as a function of altitude.</p>
 <p>Python asteroid airburst calculator</p>
 <dl class="class">
 <dt id="armageddon.Planet">
-<em class="property">class </em><code class="descclassname">armageddon.</code><code class="descname">Planet</code><span class="sig-paren">(</span><em>atmos_func='exponential'</em>, <em>atmos_filename=None</em>, <em>Cd=1.0</em>, <em>Ch=0.1</em>, <em>Q=10000000.0</em>, <em>Cl=0.001</em>, <em>alpha=0.3</em>, <em>Rp=6371000.0</em>, <em>g=9.81</em>, <em>H=8000.0</em>, <em>rho0=1.2</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">armageddon.</code><code class="sig-name descname">Planet</code><span class="sig-paren">(</span><em class="sig-param">atmos_func='exponential'</em>, <em class="sig-param">atmos_filename=None</em>, <em class="sig-param">Cd=1.0</em>, <em class="sig-param">Ch=0.1</em>, <em class="sig-param">Q=10000000.0</em>, <em class="sig-param">Cl=0.001</em>, <em class="sig-param">alpha=0.3</em>, <em class="sig-param">Rp=6371000.0</em>, <em class="sig-param">g=9.81</em>, <em class="sig-param">H=8000.0</em>, <em class="sig-param">rho0=1.2</em>, <em class="sig-param">fragmentation=True</em>, <em class="sig-param">num_scheme='RK'</em>, <em class="sig-param">ensemble=False</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet" title="Permalink to this definition">¶</a></dt>
 <dd><p>The class called Planet is initialised with constants appropriate
 for the given target planet, including the atmospheric density profile
 and other constants.</p>
 <p>Set up the initial parameters and constants for the target planet</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>atmos_func</strong> (<em>string</em><em>, </em><em>optional</em>) – Function which computes atmospheric density, rho, at altitude, z.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atmos_func</strong> (<em>string</em><em>, </em><em>optional</em>) – Function which computes atmospheric density, rho, at altitude, z.
 Default is the exponential function <code class="docutils literal notranslate"><span class="pre">rho</span> <span class="pre">=</span> <span class="pre">rho0</span> <span class="pre">exp(-z/H)</span></code>.
-Options are <code class="docutils literal notranslate"><span class="pre">exponential</span></code>, <code class="docutils literal notranslate"><span class="pre">tabular</span></code>, <code class="docutils literal notranslate"><span class="pre">constant</span></code> and <code class="docutils literal notranslate"><span class="pre">mars</span></code></li>
-<li><strong>atmos_filename</strong> (<em>string</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">atmos_func</span></code> = <code class="docutils literal notranslate"><span class="pre">'tabular'</span></code>, then set the filename of the table
-to be read in here.</li>
-<li><strong>Cd</strong> (<em>float</em><em>, </em><em>optional</em>) – The drag coefficient</li>
-<li><strong>Ch</strong> (<em>float</em><em>, </em><em>optional</em>) – The heat transfer coefficient</li>
-<li><strong>Q</strong> (<em>float</em><em>, </em><em>optional</em>) – The heat of ablation (J/kg)</li>
-<li><strong>Cl</strong> (<em>float</em><em>, </em><em>optional</em>) – Lift coefficient</li>
-<li><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Dispersion coefficient</li>
-<li><strong>Rp</strong> (<em>float</em><em>, </em><em>optional</em>) – Planet radius (m)</li>
-<li><strong>rho0</strong> (<em>float</em><em>, </em><em>optional</em>) – Air density at zero altitude (kg/m^3)</li>
-<li><strong>g</strong> (<em>float</em><em>, </em><em>optional</em>) – Surface gravity (m/s^2)</li>
-<li><strong>H</strong> (<em>float</em><em>, </em><em>optional</em>) – Atmospheric scale height (m)</li>
+Options are <code class="docutils literal notranslate"><span class="pre">exponential</span></code>, <code class="docutils literal notranslate"><span class="pre">tabular</span></code>, <code class="docutils literal notranslate"><span class="pre">constant</span></code> and <code class="docutils literal notranslate"><span class="pre">mars</span></code></p></li>
+<li><p><strong>atmos_filename</strong> (<em>string</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">atmos_func</span></code> = <code class="docutils literal notranslate"><span class="pre">'tabular'</span></code>, then set the filename of the table
+to be read in here.</p></li>
+<li><p><strong>Cd</strong> (<em>float</em><em>, </em><em>optional</em>) – The drag coefficient</p></li>
+<li><p><strong>Ch</strong> (<em>float</em><em>, </em><em>optional</em>) – The heat transfer coefficient</p></li>
+<li><p><strong>Q</strong> (<em>float</em><em>, </em><em>optional</em>) – The heat of ablation (J/kg)</p></li>
+<li><p><strong>Cl</strong> (<em>float</em><em>, </em><em>optional</em>) – Lift coefficient</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Dispersion coefficient</p></li>
+<li><p><strong>Rp</strong> (<em>float</em><em>, </em><em>optional</em>) – Planet radius (m)</p></li>
+<li><p><strong>rho0</strong> (<em>float</em><em>, </em><em>optional</em>) – Air density at zero altitude (kg/m^3)</p></li>
+<li><p><strong>g</strong> (<em>float</em><em>, </em><em>optional</em>) – Surface gravity (m/s^2)</p></li>
+<li><p><strong>H</strong> (<em>float</em><em>, </em><em>optional</em>) – Atmospheric scale height (m)</p></li>
+<li><p><strong>fragmentation</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If set to false, asteroid does not fragment and keeps its shape.</p></li>
+<li><p><strong>num_scheme</strong> (<em>string</em><em>, </em><em>optional</em>) – Set the numerical scheme with which to perform the ODE solver.
+Default is Runge-Kutta 4, <code class="docutils literal notranslate"><span class="pre">RK</span></code>. Options are Explicit Euler <code class="docutils literal notranslate"><span class="pre">EE</span></code>,
+Implicit Euler <code class="docutils literal notranslate"><span class="pre">IE</span></code> and Midpoint Implicit Euler <code class="docutils literal notranslate"><span class="pre">MIE</span></code>.</p></li>
+<li><p><strong>ensemble</strong> (<em>boolean</em><em>, </em><em>optional</em>) – For the ensemble tool. Set True to stop simulation after airburst.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="armageddon.Planet.analyse_outcome">
-<code class="descname">analyse_outcome</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.analyse_outcome" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">analyse_outcome</code><span class="sig-paren">(</span><em class="sig-param">result</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.analyse_outcome" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inspect a prefound solution to calculate the impact and airburst stats</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> (<em>DataFrame</em>) – pandas DataFrame with velocity, mass, angle, altitude, horizontal
-distance, radius and dedz as a function of time</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>outcome</strong> – dictionary with details of airburst and/or cratering event.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>result</strong> (<em>DataFrame</em>) – pandas DataFrame with velocity, mass, angle, altitude, horizontal
+distance, radius and dedz as a function of time</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>outcome</strong> – dictionary with details of airburst and/or cratering event.
 For an airburst, this will contain the following keys:
-<code class="docutils literal notranslate"><span class="pre">burst_peak_dedz</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_altitude</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_total_ke_lost</span></code>.<p>For a cratering event, this will contain the following keys:
+<code class="docutils literal notranslate"><span class="pre">burst_peak_dedz</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_altitude</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_total_ke_lost</span></code>.</p>
+<p>For a cratering event, this will contain the following keys:
 <code class="docutils literal notranslate"><span class="pre">impact_time</span></code>, <code class="docutils literal notranslate"><span class="pre">impact_mass</span></code>, <code class="docutils literal notranslate"><span class="pre">impact_speed</span></code>.</p>
 <p>All events should also contain an entry with the key <code class="docutils literal notranslate"><span class="pre">outcome</span></code>,
 which should contain one of the following strings:
 <code class="docutils literal notranslate"><span class="pre">Airburst</span></code>, <code class="docutils literal notranslate"><span class="pre">Cratering</span></code> or <code class="docutils literal notranslate"><span class="pre">Airburst</span> <span class="pre">and</span> <span class="pre">cratering</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dict</td>
-</tr>
-</tbody>
-</table>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="armageddon.Planet.calculate_energy">
-<code class="descname">calculate_energy</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.calculate_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calculate_energy</code><span class="sig-paren">(</span><em class="sig-param">result</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.calculate_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to calculate the kinetic energy lost per unit altitude in
 kilotons TNT per km, for a given solution.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> (<em>DataFrame</em>) – A pandas DataFrame with columns for the velocity, mass, angle,
-altitude, horizontal distance and radius as a function of time</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Result</strong> – Returns the DataFrame with additional column <code class="docutils literal notranslate"><span class="pre">dedz</span></code> which is the
-kinetic energy lost per unit altitude</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">DataFrame</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="armageddon.Planet.f">
-<code class="descname">f</code><span class="sig-paren">(</span><em>y</em>, <em>fragmented</em>, <em>density</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.f" title="Permalink to this definition">¶</a></dt>
-<dd><p>0: velocity
-1: mass
-2: angle
-3: altitude
-4: distance
-5: radius</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>result</strong> (<em>DataFrame</em>) – A pandas DataFrame with columns for the velocity, mass, angle,
+altitude, horizontal distance and radius as a function of time</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Result</strong> – Returns the DataFrame with additional column <code class="docutils literal notranslate"><span class="pre">dedz</span></code> which is the
+kinetic energy lost per unit altitude</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="armageddon.Planet.impact">
-<code class="descname">impact</code><span class="sig-paren">(</span><em>radius</em>, <em>velocity</em>, <em>density</em>, <em>strength</em>, <em>angle</em>, <em>init_altitude=100000.0</em>, <em>dt=0.05</em>, <em>radians=False</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.impact" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">impact</code><span class="sig-paren">(</span><em class="sig-param">radius</em>, <em class="sig-param">velocity</em>, <em class="sig-param">density</em>, <em class="sig-param">strength</em>, <em class="sig-param">angle</em>, <em class="sig-param">init_altitude=100000.0</em>, <em class="sig-param">dt=0.05</em>, <em class="sig-param">radians=False</em>, <em class="sig-param">fragmentation=True</em>, <em class="sig-param">num_scheme='RK'</em>, <em class="sig-param">ensemble=False</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.impact" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve the system of differential equations for a given impact event.
 Also calculates the kinetic energy lost per unit altitude and
 analyses the result to determine the outcome of the impact.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>radius</strong> (<em>float</em>) – The radius of the asteroid in meters</li>
-<li><strong>velocity</strong> (<em>float</em>) – The entery speed of the asteroid in meters/second</li>
-<li><strong>density</strong> (<em>float</em>) – The density of the asteroid in kg/m^3</li>
-<li><strong>strength</strong> (<em>float</em>) – The strength of the asteroid (i.e., the ram pressure above which
-fragmentation and spreading occurs) in N/m^2 (Pa)</li>
-<li><strong>angle</strong> (<em>float</em>) – The initial trajectory angle of the asteroid to the horizontal
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the asteroid in meters</p></li>
+<li><p><strong>velocity</strong> (<em>float</em>) – The entery speed of the asteroid in meters/second</p></li>
+<li><p><strong>density</strong> (<em>float</em>) – The density of the asteroid in kg/m^3</p></li>
+<li><p><strong>strength</strong> (<em>float</em>) – The strength of the asteroid (i.e., the ram pressure above which
+fragmentation and spreading occurs) in N/m^2 (Pa)</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – The initial trajectory angle of the asteroid to the horizontal
 By default, input is in degrees. If ‘radians’ is set to True, the
-input should be in radians</li>
-<li><strong>init_altitude</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial altitude in m</li>
-<li><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The output timestep, in s</li>
-<li><strong>radians</strong> (<em>logical</em><em>, </em><em>optional</em>) – Whether angles should be given in degrees or radians. Default=False
+input should be in radians</p></li>
+<li><p><strong>init_altitude</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial altitude in m</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The output timestep, in s</p></li>
+<li><p><strong>radians</strong> (<em>logical</em><em>, </em><em>optional</em>) – Whether angles should be given in degrees or radians. Default=False
 Angles returned in the DataFrame will have the same units as the
-input</li>
+input</p></li>
+<li><p><strong>fragmentation</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If set to false, asteroid does not fragment and keeps its shape.</p></li>
+<li><p><strong>num_scheme</strong> (<em>string</em><em>, </em><em>optional</em>) – Set the numerical scheme with which to perform the ODE solver.
+Default is Runge-Kutta 4, <code class="docutils literal notranslate"><span class="pre">RK</span></code>. Options are Explicit Euler <code class="docutils literal notranslate"><span class="pre">EE</span></code>,
+Implicit Euler <code class="docutils literal notranslate"><span class="pre">IE</span></code> and Midpoint Implicit Euler <code class="docutils literal notranslate"><span class="pre">MIE</span></code>.</p></li>
+<li><p><strong>ensemble</strong> (<em>boolean</em><em>, </em><em>optional</em>) – For the ensemble tool. Set True to stop simulation after airburst.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
-<li><p class="first"><strong>Result</strong> (<em>DataFrame</em>) – A pandas DataFrame containing the solution to the system.
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>Result</strong> (<em>DataFrame</em>) – A pandas DataFrame containing the solution to the system.
 Includes the following columns:
 <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">mass</span></code>, <code class="docutils literal notranslate"><span class="pre">angle</span></code>, <code class="docutils literal notranslate"><span class="pre">altitude</span></code>,
-<code class="docutils literal notranslate"><span class="pre">distance</span></code>, <code class="docutils literal notranslate"><span class="pre">radius</span></code>, <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">dedz</span></code></p>
-</li>
-<li><p class="first"><strong>outcome</strong> (<em>Dict</em>) – dictionary with details of airburst and/or cratering event.
+<code class="docutils literal notranslate"><span class="pre">distance</span></code>, <code class="docutils literal notranslate"><span class="pre">radius</span></code>, <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">dedz</span></code></p></li>
+<li><p><strong>outcome</strong> (<em>Dict</em>) – dictionary with details of airburst and/or cratering event.
 For an airburst, this will contain the following keys:
 <code class="docutils literal notranslate"><span class="pre">burst_peak_dedz</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_altitude</span></code>, <code class="docutils literal notranslate"><span class="pre">burst_total_ke_lost</span></code>.</p>
 <p>For a cratering event, this will contain the following keys:
@@ -266,83 +255,100 @@ which should contain one of the following strings:
 </li>
 </ul>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="armageddon.Planet.plot_results">
+<code class="sig-name descname">plot_results</code><span class="sig-paren">(</span><em class="sig-param">result</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.plot_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate basic plots of the results of the simulation against altitude</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>result</strong> (<em>DataFrame</em>) – pandas DataFrame with velocity, mass, angle, altitude, horizontal
+distance, radius and dedz as a function of time</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Figure 1</strong> – matplotlib plot with 6 subplots of time, velocity, dedz, mass, radius and
+angle versus altitude</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>plot</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="armageddon.Planet.solve_atmospheric_entry">
-<code class="descname">solve_atmospheric_entry</code><span class="sig-paren">(</span><em>radius</em>, <em>velocity</em>, <em>density</em>, <em>strength</em>, <em>angle</em>, <em>init_altitude=100000.0</em>, <em>dt=0.05</em>, <em>radians=False</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.solve_atmospheric_entry" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">solve_atmospheric_entry</code><span class="sig-paren">(</span><em class="sig-param">radius</em>, <em class="sig-param">velocity</em>, <em class="sig-param">density</em>, <em class="sig-param">strength</em>, <em class="sig-param">angle</em>, <em class="sig-param">init_altitude=100000.0</em>, <em class="sig-param">dt=0.05</em>, <em class="sig-param">radians=False</em>, <em class="sig-param">fragmentation=True</em>, <em class="sig-param">num_scheme='RK'</em>, <em class="sig-param">ensemble=False</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.Planet.solve_atmospheric_entry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve the system of differential equations for a given impact scenario</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>radius</strong> (<em>float</em>) – The radius of the asteroid in meters</li>
-<li><strong>velocity</strong> (<em>float</em>) – The entery speed of the asteroid in meters/second</li>
-<li><strong>density</strong> (<em>float</em>) – The density of the asteroid in kg/m^3</li>
-<li><strong>strength</strong> (<em>float</em>) – The strength of the asteroid (i.e., the ram pressure above which
-fragmentation and spreading occurs) in N/m^2 (Pa)</li>
-<li><strong>angle</strong> (<em>float</em>) – The initial trajectory angle of the asteroid to the horizontal
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – The radius of the asteroid in meters</p></li>
+<li><p><strong>velocity</strong> (<em>float</em>) – The entery speed of the asteroid in meters/second</p></li>
+<li><p><strong>density</strong> (<em>float</em>) – The density of the asteroid in kg/m^3</p></li>
+<li><p><strong>strength</strong> (<em>float</em>) – The strength of the asteroid (i.e., the ram pressure above which
+fragmentation and spreading occurs) in N/m^2 (Pa)</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – The initial trajectory angle of the asteroid to the horizontal
 By default, input is in degrees. If ‘radians’ is set to True, the
-input should be in radians</li>
-<li><strong>init_altitude</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial altitude in m</li>
-<li><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The output timestep, in s</li>
-<li><strong>radians</strong> (<em>logical</em><em>, </em><em>optional</em>) – Whether angles should be given in degrees or radians. Default=False
+input should be in radians</p></li>
+<li><p><strong>init_altitude</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial altitude in m</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The output timestep, in s</p></li>
+<li><p><strong>radians</strong> (<em>logical</em><em>, </em><em>optional</em>) – Whether angles should be given in degrees or radians. Default=False
 Angles returned in the DataFrame will have the same units as the
-input</li>
+input</p></li>
+<li><p><strong>fragmentation</strong> (<em>boolean</em><em>, </em><em>optional</em>) – If set to false, asteroid does not fragment and keeps its shape.</p></li>
+<li><p><strong>num_scheme</strong> (<em>string</em><em>, </em><em>optional</em>) – Set the numerical scheme with which to perform the ODE solver.
+Default is Runge-Kutta 4, <code class="docutils literal notranslate"><span class="pre">RK</span></code>. Options are Explicit Euler <code class="docutils literal notranslate"><span class="pre">EE</span></code>,
+Implicit Euler <code class="docutils literal notranslate"><span class="pre">IE</span></code> and Midpoint Implicit Euler <code class="docutils literal notranslate"><span class="pre">MIE</span></code>.</p></li>
+<li><p><strong>ensemble</strong> (<em>boolean</em><em>, </em><em>optional</em>) – For the ensemble tool. Set True to stop simulation after airburst.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Result</strong> – A pandas DataFrame containing the solution to the system.
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Result</strong> – A pandas DataFrame containing the solution to the system.
 Includes the following columns:
 <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">mass</span></code>, <code class="docutils literal notranslate"><span class="pre">angle</span></code>, <code class="docutils literal notranslate"><span class="pre">altitude</span></code>,
 <code class="docutils literal notranslate"><span class="pre">distance</span></code>, <code class="docutils literal notranslate"><span class="pre">radius</span></code>, <code class="docutils literal notranslate"><span class="pre">time</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="armageddon.solve_ensemble">
-<code class="descclassname">armageddon.</code><code class="descname">solve_ensemble</code><span class="sig-paren">(</span><em>planet</em>, <em>fiducial_impact</em>, <em>variables</em>, <em>radians=False</em>, <em>rmin=8</em>, <em>rmax=12</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.solve_ensemble" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">armageddon.</code><code class="sig-name descname">solve_ensemble</code><span class="sig-paren">(</span><em class="sig-param">planet</em>, <em class="sig-param">fiducial_impact</em>, <em class="sig-param">variables</em>, <em class="sig-param">radians=False</em>, <em class="sig-param">rmin=8</em>, <em class="sig-param">rmax=12</em>, <em class="sig-param">N=10000</em>, <em class="sig-param">nval=21</em><span class="sig-paren">)</span><a class="headerlink" href="#armageddon.solve_ensemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run asteroid simulation for a distribution of initial conditions and
 find the burst distribution</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>planet</strong> (<em>object</em>) – The Planet class instance on which to perform the ensemble calculation</li>
-<li><strong>fiducial_impact</strong> (<em>dict</em>) – Dictionary of the fiducial values of radius, angle, strength, velocity
-and density</li>
-<li><strong>variables</strong> (<em>list</em>) – List of strings of all impact parameters to be varied in the ensemble
-calculation</li>
-<li><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum radius, in m, to use in the ensemble calculation,
-if radius is one of the parameters to be varied.</li>
-<li><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum radius, in m, to use in the ensemble calculation,
-if radius is one of the parameters to be varied.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planet</strong> (<em>object</em>) – The Planet class instance on which to perform the ensemble calculation</p></li>
+<li><p><strong>fiducial_impact</strong> (<em>dict</em>) – Dictionary of the fiducial values of radius, angle, strength, velocity
+and density</p></li>
+<li><p><strong>variables</strong> (<em>list</em>) – List of strings of all impact parameters to be varied in the ensemble
+calculation</p></li>
+<li><p><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum radius, in m, to use in the ensemble calculation,
+if radius is one of the parameters to be varied.</p></li>
+<li><p><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum radius, in m, to use in the ensemble calculation,
+if radius is one of the parameters to be varied.</p></li>
+<li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of times to sample input parameters and, correspondingly, number
+of times the simulation is run.</p></li>
+<li><p><strong>nval</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of possible input values from given range to sample from.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ensemble</strong> – DataFrame with columns of any parameters that are varied and the
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ensemble</strong> – DataFrame with columns of any parameters that are varied and the
 airburst altitude</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -373,13 +379,11 @@ airburst altitude</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -400,7 +404,7 @@ airburst altitude</p>
       &copy;.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
