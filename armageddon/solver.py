@@ -74,7 +74,6 @@ class Planet():
         if atmos_func == 'exponential':
             self.rhoa = lambda x: rho0 * np.exp(-x/self.H)
         elif atmos_func == 'tabular':
-            assert init_altitude <= 86000
             #BASE_PATH = os.path.dirname(os.path.dirname(__file__))
             #atmos_filename = os.sep.join((BASE_PATH,'/data/AltitudeDensityTable.csv'))
             table = pd.read_csv(atmos_filename, header=None, delim_whitespace=True, skiprows=6)
@@ -225,24 +224,40 @@ class Planet():
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
 
+        ke0 = 1/2 * mass * y[0]**2
+
         while t <= T: # initiate timeloop
             
-            if y[1] <= 0: # stop simulation if mass becomes zero
-                break
-
-            if y[3] <= 0: # stop simulation if mass reaches ground
-                break
-
-            t = t + dt # move up to next timestep
-            T_arr.append(t) # store new timestep
-
             if strength <= (self.rhoa(y[3]) * y[0]**2) and fragmentation is True:
                 fragmented = True # define status of fragmentation
             else:
                 fragmented = False
 
-            y = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
-            Y.append(y) #store caomputed values
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
+                break
+
+            
+            '''dif_ke = abs(((1/2 * y_next[1] * y_next[0]**2) - (1/2 * y[1] * y[0]**2)))
+            dif_alt = abs((y_next[3] - y[3]))
+            dif = dif_ke/dif_alt 
+
+            print(dif)
+            
+            if dif > 1:
+                dif = 1
+            dt = dt * (1 + 0.2-dif)
+            if dt > 0.2:
+                dt = 0.2
+            if dt < 0.01:
+                dt = 0.01
+            print(dt)'''
+
+            t = t + dt # move up to next timestep
+            T_arr.append(t) # store new timestep
+
+            Y.append(y_next) #store caomputed values
+            y = y_next
 
             
         Y = np.array(Y)
@@ -277,20 +292,17 @@ class Planet():
             Returns the DataFrame with additional column ``dedz`` which is the
             kinetic energy lost per unit altitude
         """
-
-        dedz_vec = np.array([0])
+        dedz_vec = np.zeros(len(result)) # create array to store dedz results
         velocity = np.array(result.velocity)
         mass = np.array(result.mass)
         altitude = np.array(result.altitude)
 
-
+        # get dedz as released energy per altitude
         ke = ((1/2 * mass[1:] * velocity[1:]**2) - (1/2 * mass[:-1] * velocity[:-1]**2)) / 4.184e12
         alt = (altitude[1:] - altitude[:-1]) / 1e3 # get kinetic energy and altitude differnces between timesteps
-        d = ke/alt
-        dedz_vec = np.concatenate((dedz_vec, d)) # devide energy over altitude, note the first entry stays zero
-        #i = np.where(dedz_vec < 0) # turn all negative value to zero
-        #dedz_vec[i] = 0
-
+        dedz_vec[1:] = ke / alt # devide energy over altitude, note the first entry stays zero
+        i = np.where(dedz_vec < 0) # turn all negative value to zero
+        dedz_vec[i] = 0
         '''
         dedz = np.zeros(len(result)) # create array to store dedz results
         for i in range(1,len(result)): # loop through all rows of result
@@ -300,11 +312,8 @@ class Planet():
             if dedz[i] < 0:
                 dedz[i] = 0'''
         #print('Vectorisation of calculate_energy(): ', np.allclose(dedz, dedz_vec))
-
-        #print(result)
-        #print(dedz_vec)
-        result['dedz'] = dedz_vec # add dedz to DataFrame 'result'
-
+        
+        result.insert(len(result.columns), 'dedz', dedz_vec) # add dedz to DataFrame 'result'
 
         return result
 
@@ -452,7 +461,8 @@ class Planet():
         
         ax6.scatter(result.altitude, result.angle, marker='.', color='r')
         ax6.set_xlabel('altitude [m]')
-        ax6.set_ylabel('angle [degrees]')
+        ax6.set_ylabel('angle [°]')
         ax6.grid()
 
         plt.show()
+        
