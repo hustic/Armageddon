@@ -13,7 +13,7 @@ def solve_ensemble(
         variables,
         radians=False,
         rmin=8, rmax=12,
-        N=int(200),nval=int(11)):
+        N=int(10000),nval=int(21)):
     """
     Run asteroid simulation for a distribution of initial conditions and
     find the burst distribution
