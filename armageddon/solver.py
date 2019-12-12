@@ -204,7 +204,7 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
-            'RE': self.recursiv_explicit_euler,
+            'RKA': self.adaptive_RK,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -221,9 +221,7 @@ class Planet():
         mass = density * 4/3 * radius**3 * np.pi # defining the mass of astroid assuming a sphere shape
         init_distance = 0 # intial distance assumed to be zero
         y = np.array([velocity, mass, angle, init_altitude, init_distance, radius]) # defining initial condition array
-        D = []
-        D.append(0)
-        dif = 0
+     
         Y = [] # empty list to store solution array for every timestep
         Y.append(y) # store initial condition
         while t <= T: # initiate timeloop
@@ -233,27 +231,21 @@ class Planet():
             else:
                 fragmented = False
 
-            if num_scheme == 'RE':
-                y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density, dif, velocity) # compute values for next timestep
-            else:
-                y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
             if ensemble is True and y[2] > (89 * np.pi/180): # for purpose of ensemble: break after airburst
                 break
 
             if y_next[1] <= 0 or y_next[3] <= 0: # stop simulation if mass or altitude become zero
                 break
-            dif = abs((y_next[0] - y[0]) / dt)
-            D.append(dif)
+            
             t += dt
             T_arr.append(t) # store new timestep
 
             Y.append(y_next) #store caomputed values
             y = y_next
 
-            
         Y = np.array(Y)
-        fig = plt.figure(figsize=(5, 5))
-        plt.plot(Y[:, 3],D)
+
         if radians is False:
             Y[:, 2] = np.round_(list(map(lambda x: x * 180/np.pi, Y[:, 2])), decimals=10)
 
@@ -342,7 +334,7 @@ class Planet():
         if result.altitude[index_max] > 0: # check for Airburst
             burst_peak_dedz = result.dedz[index_max] # released energy at airbusrt
             burst_altitude = result.altitude[index_max] # altitude of airburst
-            burst_total_ke_lost = 1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))#sum(result.iloc['dedz'][:index_max]
+            burst_total_ke_lost = (1/2 * ((result.mass[0] * result.velocity[0]**2) - (result.mass[index_max] * result.velocity[index_max]**2))) / 4.184e12
             # above is: total released energy
             # add the above three parameters to dictionary below
             outcome['burst_peak_dedz'] = burst_peak_dedz
@@ -396,27 +388,9 @@ class Planet():
     def explicit_euler(self, y, f, dt, fragmented, density):
         y1 = y + f(y, fragmented, density) * dt
         return y1
+
+    def adaptive_RK():
         
-    def recursiv_explicit_euler(self, y, f, dt, fragmented, density, dif, velocity):
-        i = 0
-        if dif > (2000):
-            while i <= 4:
-                i += 1
-                y = self.explicit_euler(y, f, dt, fragmented, density)
-            return y
-        return self.explicit_euler(y, f, dt, fragmented, density)
-
-        '''c = dt/2
-        y1 = self.explicit_euler(y, f, dt, fragmented, density)
-        yc = self.explicit_euler(y, f, c, fragmented, density)
-        y2 = self.explicit_euler(yc, f, c, fragmented, density)
-        err = abs(y[0] - y2[0])
-        print(err)
-        tol = 8000
-        if err < tol:
-            return y2
-
-        return self.recursiv_explicit_euler(y, f, c, fragmented, density)'''
 
     def implicit_euler(self, y, f, dt, fragmented, density):
         y_dummy = y + f(y, fragmented, density) * dt
@@ -427,6 +401,8 @@ class Planet():
         y_dummy = y + f(y, fragmented, density) * dt
         y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
         return y
+
+    def adaptive_RK(:)
 
     def runge_kutta(self, y, f, dt, fragmented, density):
         k1 = f(y, fragmented, density) * dt
