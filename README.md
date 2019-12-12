@@ -52,6 +52,11 @@ This can be done in the following format:
 Where the parameters and fiducial values can be specified, as well as the input variables to be varied.
 For more information regarding the use of this functionality, please refer to the [documentation](./docs_build/index.html).
 
+After running the ensemble, a plot of the resultant probability distribution for burst altitude can be generated using:
+```
+>>> armageddon.ensemble.plot_burst_altitude(ensemble)
+```
+
 ### Documentation
 
 The code includes [Sphinx](https://www.sphinx-doc.org) documentation. On systems with Sphinx installed, this can be built by running

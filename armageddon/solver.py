@@ -240,7 +240,6 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
-            # 'RKA': self.adaptive_RK,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -399,6 +398,7 @@ class Planet():
             raise ValueError
         return outcome
 
+    # Function for changes to variables after one time-step
     def f(self, y, fragmented, density):
         # 0: velocity
         # 1: mass
@@ -418,6 +418,7 @@ class Planet():
             f[5] = 0
         return f
 
+    # Functions for numerical schemes
     def explicit_euler(self, y, f, dt, fragmented, density):
         y1 = y + f(y, fragmented, density) * dt
         return y1

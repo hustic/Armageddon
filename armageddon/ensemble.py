@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 from scipy.special import erf
 import dask
+import matplotlib.pyplot as plt
 
 from .solver import Planet as planet
 
-__all__ = ['solve_ensemble']
+__all__ = ['solve_ensemble', 'plot_burst_altitude']
 
 def solve_ensemble(
         planet,
@@ -130,7 +131,7 @@ def solve_ensemble(
     data = np.array(data)
     return pd.DataFrame(data.T, columns=variables+['burst_altitude'])
 
-def plot_ensemble(ensemble):
+def plot_burst_altitude(ensemble):
     """
     Generate histogram plots for input parameters and burst altitude
 
@@ -145,17 +146,16 @@ def plot_ensemble(ensemble):
     -------
 
     Figure 1 : plot
-        matplotlib plot of histograms of input parameters and burst altitudes.
+        matplotlib plot of burst altitude distribution.
     """
-    fig = plt.figure(figsize=(12, 8))
-    fig.tight_layout()
-    ax1 = plt.subplot(321)
-    ax2 = plt.subplot(322)
-    ax3 = plt.subplot(323)
-    ax4 = plt.subplot(324)
-    ax5 = plt.subplot(325)
-    ax6 = plt.subplot(326)
 
+    # Extract burst altitude
     burst_altitude = np.array(ensemble['burst_altitude'])
-    
+    # Convert into histogram data
+    counts, bins = np.histogram(burst_altitude, 20)
+    # Normalize to create probability distribution
+    counts = counts/np.sum(counts)
+
+    plt.plot(counts)
+    plt.grid()
     plt.show()
