@@ -452,8 +452,7 @@ class Planet():
         
         ax6.scatter(result.altitude, result.angle, marker='.', color='r')
         ax6.set_xlabel('altitude [m]')
-        ax6.set_ylabel('angle [°]')
+        ax6.set_ylabel('angle [degrees]')
         ax6.grid()
 
         plt.show()
-        

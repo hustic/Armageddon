@@ -5,5 +5,5 @@ matplotlib
 pytest
 pytest-timeout
 sphinx
-dask
+dask[complete]
 
