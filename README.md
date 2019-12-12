@@ -1,4 +1,4 @@
-## Armageddon Tool - Atmospheric Entry and Disruption of Asteroids
+## Armageddon Tool - Team Mathilde
 
 Asteroids entering Earth’s atmosphere are subject to extreme drag forces that decelerate, heat and disrupt the space rocks. The fate of an asteroid is a complex function of its initial mass, speed, trajectory angle and internal strength. 
 
@@ -21,6 +21,7 @@ The module can then be imported in python with
 ```
 
 #### Planet
+
 The core functionality is to simulate an asteroid entering the atmosphere under specified initial conditions. 
 This functionality can be called in the following example format:
 ```
@@ -32,10 +33,11 @@ Please refer to the [documentation](./docs_build/index.html) in the `index.html`
 
 After running the simulation, some basic plots can be generated using:
 ```
->>> insert text here
+>>> planet.plot_results(results)
 ```
 
 #### Ensemble
+
 In addition to the core functionality, it is possible to perform an ensemble of simulations to vary specified input parameters according to their respective probability distributions and find the distribution of corresponding burst altitudes.
 This can be done in the following format:
 ```
@@ -45,17 +47,22 @@ This can be done in the following format:
 		      'strength': 100000.0,
                        'velocity': 21000.0,
                        'density': 3000.0}
->>> ensemble = armageddon.ensemble.solve_ensemble(planet,fiducial_impact,variables=[],rmin=8,rmax=12)
+>>> ensemble = armageddon.ensemble.solve_ensemble(planet,fiducial_impact,variables=[],rmin=8,rmax=12, N=200)
 ```
 Where the parameters and fiducial values can be specified, as well as the input variables to be varied.
 For more information regarding the use of this functionality, please refer to the [documentation](./docs_build/index.html).
+
+After running the ensemble, a plot of the resultant probability distribution for burst altitude can be generated using:
+```
+>>> armageddon.ensemble.plot_burst_altitude(ensemble)
+```
 
 ### Documentation
 
 The code includes [Sphinx](https://www.sphinx-doc.org) documentation. On systems with Sphinx installed, this can be built by running
 
 ```
-python -m sphinx docs html
+python -m sphinx docs docs_build
 ```
 
 then viewing the `index.html` file in the `docs_build` directory in your browser.
@@ -82,4 +89,6 @@ This software is published under the [MIT license](./LICENSE).
 
 ### References
 
+Brown, P. G., Assink, J. D., Astiz, L., Blaauw, R., Boslough, M. B., Borovička, J., ... & Cooke, W. D. (2013). A 500-kiloton airburst over Chelyabinsk and an enhanced hazard from small impactors. Nature, 503(7475), 238.
 
+Popova, O. P., Jenniskens, P., Emel’yanenko, V., Kartashova, A., Biryukov, E., Khaibrakhmanov, S., ... & Badyukov, D. D. (2013). Chelyabinsk airburst, damage assessment, meteorite recovery, and characterization. Science, 342(6162), 1069-1073.
