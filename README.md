@@ -1,4 +1,4 @@
-# ACSE-4-armageddon
+# Armageddon - Atmospheric Entry and Disruption of Asteroids
 
 Asteroids entering Earth’s atmosphere are subject to extreme drag forces that decelerate, heat and disrupt the space rocks. The fate of an asteroid is a complex function of its initial mass, speed, trajectory angle and internal strength. 
 
@@ -15,7 +15,7 @@ pip install git+https://github.com/acse-2019/acse-4-armageddon-mathilde.git
 
 ### User instructions
 
-The module can be imported with
+The module can then be imported in python with
 ```
 >>> import armageddon
 ```
@@ -74,3 +74,7 @@ The tool includes a fully automated testing suite, which you can use to check it
 ```
 python -m pytest armageddon
 ```
+
+### License
+
+This software is published under the [MIT license](./LICENSE).
