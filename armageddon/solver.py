@@ -148,6 +148,7 @@ class Planet():
             which should contain one of the following strings:
             ``Airburst``, ``Cratering`` or ``Airburst and cratering``
         """
+        
         result = self.solve_atmospheric_entry(radius, velocity, density, strength, angle,
         init_altitude, dt, radians, fragmentation, num_scheme, ensemble)
         result = self.calculate_energy(result)
@@ -204,7 +205,7 @@ class Planet():
         """
         num_scheme_dict = {
             'EE': self.explicit_euler,
-            #'RKA': self.adaptive_RK,
+            'ARK': self.adaptive_RK,
             'IE': self.implicit_euler,
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
@@ -399,7 +400,14 @@ class Planet():
         y = y + (f(y, fragmented, density) + f(y_dummy, fragmented, density)) * 0.5 * dt
         return y
 
-    #def adaptive_RK(:)
+    def adaptive_RK(self, y, f, dt, fragmented, density):
+        y1 = self.explicit_euler(y, f, dt, fragmented, density)
+        y2 = y + (f(y, fragmented, density) + f(y1, fragmented, density)) * 0.5 * dt
+        err = abs(y2[0] - y1[0])/abs(y2[0] + y1[0])
+        tol = 0.01
+        dt = 0.9 * dt * min(max(np.sqrt(tol / (2 * err)), 0.3), 2)
+        print(dt, err)
+        return y2
 
     def runge_kutta(self, y, f, dt, fragmented, density):
         k1 = f(y, fragmented, density) * dt

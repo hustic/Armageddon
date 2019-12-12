@@ -11,38 +11,36 @@ strength = [3000, 10e5]
 angle = [30, 45]
 density = [1200, 3000]
 
-earth = Planet()
+earth = Planet(g=0, Cl=0, Ch=0)
 #df_vec, out_vec = earth.impact(radius, velocity, density, strength, angle, num_scheme='RK', fragmentation=True)
 
-'''sci_res = scipy_test.sci_sol()
-print(sci_res)'''
 
-start_time = time.time()
-df, out = earth.impact(10, 20e3, 3000, 10e5, 81, num_scheme='EE', fragmentation=True, dt=0.05, ensemble=False)
-print(df, out)
-print(time.time() - start_time)
 
-#print(df.altitude)
-#anal_df = anal_sol(np.array(df.altitude), 1, 10e3, 3000, 10e5, 45)
+sci_res = scipy_test.sci_sol(5, 10e3, 1200, 10e5, 45, num_scheme='RK45', fragmentation=False, g=0, C_L=0, C_H=0, dt=0.01)
 
-earth.plot_results(df)
+df, out = earth.impact(5, 10e3, 1200, 10e5, 45, num_scheme='RK', fragmentation=False, dt=0.01, ensemble=False)
+anal_res = anal_sol(df.altitude, 5, 10e3, 1200, 10e5, 45)
 
-'''fig = plt.figure(figsize=(8, 8))
+fig = plt.figure(figsize=(8, 8))
 ax1 = plt.subplot(211)
 ax2 = plt.subplot(212)
 
-ax1.scatter(df.altitude, df.angle, label='numeric', marker='.', color='r')
-ax1.plot(anal_df.altitude, anal_df.velocity, label='analytic', color='b')
-ax1.set_ylabel('altitude')
-ax1.set_xlabel('velocity')
+ax1.scatter(df.velocity, df.altitude, label='numeric', marker='.', color='r')
+ax1.plot(sci_res.velocity, sci_res.altitude, label='scipy', color='b')
+ax1.plot(anal_res.velocity, anal_res.altitude, label='anal', color='g')
+ax1.set_ylabel('velocity')
+ax1.set_xlabel('altitude')
+ax1.set_ylim(0,1e5)
 ax1.grid()
 ax1.legend()
 
-ax2.scatter(df.altitude, df.dedz, label='numeric', marker='.', color='r')
-ax2.plot(df.altitude, anal_df.dedz, label='analytic', color='b')
-ax2.set_ylabel('altitude')
-ax2.set_xlabel('dedz')
+ax2.scatter(df.dedz, df.altitude, label='numeric', marker='.', color='r')
+ax2.plot(sci_res.dedz, sci_res.altitude, label='scipy', color='b')
+ax2.plot(anal_res.dedz, anal_res.altitude, label='anal', color='g')
+ax2.set_ylabel('dedz')
+ax2.set_xlabel('altitude')
+ax2.set_ylim(0,1e5)
 ax2.grid()
 ax2.legend()
 
-plt.show()'''
+plt.show()

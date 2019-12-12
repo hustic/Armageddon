@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def anal_sol(H_plot, radius=10, velocity=20e3, density=3000, strength=3000, angle=45,
+def anal_sol(H_plot, radius=10, velocity=20e3, density=3000, strength=10e5, angle=45,
                init_altitude=100e3, radians=False):
     '''
     Solves analytical solution for meteroid impact
