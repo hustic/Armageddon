@@ -245,6 +245,8 @@ class Planet():
             'RK': self.runge_kutta
             }
 
+        if ensemble is True: # always use explicit euler for ensemble
+            num_scheme = 'EE'
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 

@@ -14,7 +14,7 @@ def solve_ensemble(
         variables,
         radians=False,
         rmin=8, rmax=12,
-        N=int(10000), nval=int(21)):
+        N=int(1000), nval=int(21)):
     """
     Run asteroid simulation for a distribution of initial conditions and
     find the burst distribution
@@ -118,7 +118,7 @@ def solve_ensemble(
 
     # Run parallelized simulation
     dask.config.set(scheduler='processes')
-    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, num_scheme='EE', ensemble=True)
+    lazies = [dask.delayed(planet.solve_atmospheric_entry)(*x, ensemble=True)
               for x in params.T]
     results = [dask.delayed(planet.calculate_energy)(lazy) for lazy in lazies]
     outcomes = [dask.delayed(planet.analyse_outcome)(result) for result in results]
@@ -130,7 +130,8 @@ def solve_ensemble(
     data.append(bursts)
     # Convert to array and return in pandas DataFrame
     data = np.array(data)
-    return pd.DataFrame(data.T, columns=variables+['burst_altitude'])
+    output = pd.DataFrame(data.T, columns=variables+['burst_altitude'])
+    return output[output.burst_altitude < 100000]
 
 def plot_burst_altitude(ensemble):
     """
@@ -154,9 +155,14 @@ def plot_burst_altitude(ensemble):
     burst_altitude = np.array(ensemble['burst_altitude'])
     # Convert into histogram data
     counts, bins = np.histogram(burst_altitude, 20)
+    bincenters = np.mean(np.vstack([bins[0:-1],bins[1:]]), axis=0)
+    print(bincenters)
     # Normalize to create probability distribution
     counts = counts/np.sum(counts)
 
-    plt.plot(counts)
+    plt.plot(bincenters,counts)
     plt.grid()
+    plt.suptitle('Burst Altitude Distribution')
+    plt.xlabel('Burst Altitude (m)')
+    plt.ylabel('P')
     plt.show()
