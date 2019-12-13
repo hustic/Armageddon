@@ -473,7 +473,7 @@ class Planet():
             f[2] = g * np.cos(y[2]) / y[0]  - (C_L * rho_a(y[3]) * np.pi * y[5]**2 * y[0]) / (2 * y[1]) - (y[0] * np.cos(y[2])) / (R_p + y[3])
             f[3] = - y[0] * np.sin(y[2])
             f[4] = (y[0] * np.cos(y[2])) / (1 + y[3] / R_p)
-            if fragmentation == True:
+            if fragmentation == True and strength <= rho_a(y[3])*y[0]**2:
                 f[5] = np.sqrt(7/2 * alpha * rho_a(y[3]) / density) * y[0]
             else:
                 f[5] = 0
