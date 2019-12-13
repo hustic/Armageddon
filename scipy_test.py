@@ -2,9 +2,9 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
 
-def sci_sol(radius=10, velocity=20e3, density=3000, strength = 10e5, angle=45, init_altitude=100e3, distance=0, dt = 0.05, fragmentation=True, num_scheme='RK45', radians=False,
-    C_D = 1.,
-    C_H = 0.1,
+def sci_sol(radius=10, velocity=20e3, density=3000, strength=10e5, angle=45, init_altitude=100e3, distance=0, dt=0.05, fragmentation=True, num_scheme='RK45', radians=False,
+    C_D=1.,
+    C_H=0.1,
     Q = 1e7,
     C_L = 1e-3,
     R_p = 6371e3,

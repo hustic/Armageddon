@@ -3,11 +3,8 @@ import numpy.linalg as sl
 from armageddon.solver import Planet
 import pandas as pd
 import matplotlib.pyplot as plt
-import random
 import scipy.interpolate as si
 import time
-
-random.seed(time.time())
 
 def parse_data(input_radius,input_velocity,input_density,input_strength,input_angle,profile_name,input_radians,N,num):
     '''
@@ -60,57 +57,59 @@ def parse_data(input_radius,input_velocity,input_density,input_strength,input_an
     dedz_input = np.array(pd.to_numeric(data.iloc[1:,1]))
     lp = np.polyfit(height_input, dedz_input,15)
     f = np.poly1d(lp)
-    radius = np.zeros(N+1)
-    velocity = np.zeros(N+1)
-    density = np.zeros(N+1)
-    strength = np.zeros(N+1)
-    angle = np.zeros(N+1)
-    error = np.zeros(N+1)
-    find_altitude = []
-    find_dedz = []
+    if input_radius ==None:
+        radius = np.linspace(5,50,N+1)
+    else:
+        radius = np.full(N+1,input_radius)
+    if input_velocity==None:
+        velocity = np.linspace(1e3,1e5,N+1)
+    else:    
+        velocity = np.full(N+1,input_velocity)
+    if input_density == None:
+        density = np.linspace(1e3,7000,N+1)
+    else:
+        density = np.full(N+1,input_density)
+    if input_strength == None:
+        strength = np.linspace(1e3,1e7,N+1)
+    else:
+        strength = np.full(N+1,input_strength)
+    if input_angle == None:
+        angle = np.linspace(0,90,N+1)
+    else:
+        angle = np.full(N+1,input_angle)
+    
+    #strength = np.linspace(1e3,1e5,N+1)
+    #xp,yp = np.meshgrid(radius,strength)
+    #point = np.rec.fromarrays([xp,yp])
+    #angle = np.linspace(1e3,1e5,N+1)
+    error = np.zeros([N+1,N+1])
+    find_altitude = np.zeros([N+1,N+1])
+    find_dedz = np.zeros([N+1,N+1])
     start_loop_time = time.time()
     print('before simultation passed:',start_loop_time-start_time)
     P = Planet()
     for i in range(N+1):
-        if input_radius ==None:
-            radius[i] = random.randrange(5,50,1)
-        else:
-            radius[i] = input_radius
-        if input_velocity==None:
-            velocity[i] = random.randrange(1e3,1e5,1)
-        else:    
-            velocity[i] =input_velocity
-        if input_density == None:
-            density[i] = random.randrange(1,7000,1)
-        else:
-            density[i] = input_density
-        if input_strength == None:
-            strength[i] = random.randrange(1000,1e7,1)
-        else:
-            strength[i] = input_strength
-        if input_angle == None:
-            angle[i] = random.randrange(0,90,1)
-        else:
-            angle[i] = input_angle
-
-        result, outcomm = P.impact(radius[i], velocity[i], density[i], strength[i], angle[i],
-               init_altitude=100e3, dt=0.05, radians=input_radians,
-               fragmentation=True, num_scheme=num)
-        dedz = np.array(result.dedz[:])
-        alts= np.array(result.altitude[:])
-        test_altitude = alts[np.where((alts<=max(height_input))&(alts>=min(height_input)))]
-        test_dedz = dedz[np.where((alts<=max(height_input))&(alts>=min(height_input)))]
-        com_dedz = f(test_altitude)
-        error[i] = sl.norm(test_dedz-com_dedz)/np.sqrt(len(test_dedz))
-        find_altitude.append(test_altitude)
-        find_dedz.append(test_dedz)
-    
+        radius_test = radius[i]
+        for j in range(N+1):
+            strength_test = strength[j]
+            result, outcomm = P.impact(radius_test, input_velocity, input_density, strength_test, input_angle,
+                init_altitude=100e3, dt=0.05, radians=input_radians,
+                fragmentation=True, num_scheme=num)
+            test_dedz = np.array(result.dedz[:])
+            test_height = np.array(result.altitude[:])
+            test_altitude = test_height[np.where((test_height<=max(height_input))&(test_height>=min(height_input)))]
+            test_dedz = test_dedz[np.where((test_height<=max(height_input))&(test_height>=min(height_input)))]
+            com_dedz = f(test_altitude)
+            error[i][j] = (sl.norm(test_dedz-com_dedz)/np.sqrt(len(test_dedz)))
+            find_altitude[i][j] = test_altitude
+            find_dedz[i][j]= test_dedz
 
     loc = np.argmin(error)
     B = {'radius':radius[loc],'velocity':velocity[loc],'density':density[loc],
                   'strength':strength[loc],'angle':angle[loc]}
     print('loops for:',time.time()-start_loop_time)
     print(B)
+    print('the best fit error is:',error[loc])
     fit_dedz2 = find_dedz[loc]
     fit_height = find_altitude[loc]
     fig = plt.figure(figsize=(8, 6))

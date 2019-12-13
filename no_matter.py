@@ -1,16 +1,17 @@
 import numpy as np
-from solver import Planet
+from armageddon.solver import Planet
 import matplotlib.pyplot as plt
 from analytical import anal_sol
 import time
 import scipy_test
-import asteroid_par
+from asteroid_par import parse_data
 
-earth = Planet(g=0, Cl=0, Ch=0)
-
-
+#earth = Planet(g=0, Cl=0, Ch=0)
 
 
+want = parse_data(None, 19200, 3300, None, 18.3, './data/ChelyabinskEnergyAltitude.csv', False,100, 'RK')
+
+print(want)
 
 '''sci_res = scipy_test.sci_sol(5, 10e3, 1200, 10e5, 45, num_scheme='RK45', fragmentation=False, g=0, C_L=0, C_H=0, dt=0.01)
 
