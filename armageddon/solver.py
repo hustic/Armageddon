@@ -209,7 +209,8 @@ class Planet():
             'MIE': self.midpoint_implicit_euler,
             'RK': self.runge_kutta
             }
-
+        if ensemble is True:
+            num_scheme = 'EE'
         if radians is False: # converts degrees to radians
             angle = angle * (np.pi)/180
 
@@ -232,6 +233,7 @@ class Planet():
                 fragmented = False
 
             y_next = num_scheme_dict[num_scheme](y, self.f, dt, fragmented, density) # compute values for next timestep
+            
             if ensemble is True and y[2] > (89 * np.pi/180): # for purpose of ensemble: break after airburst
                 break
 
