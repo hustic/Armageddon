@@ -1,6 +1,9 @@
 
 from collections import OrderedDict
 import pandas as pd
+import numpy as np
+from scipy.integrate import solve_ivp
+from scipy.integrate import odeint
 
 from pytest import fixture
 
@@ -113,4 +116,45 @@ def test_ensemble(planet, armageddon):
                                                   rmin=8, rmax=12)
 
     assert 'burst_altitude' in ensemble.columns
-    
+
+def test_solve_atmospheric_entry_with_scipy_odeint(planet, result, input_data):
+    assert type(result) is pd.DataFrame
+
+    for key in ('velocity', 'mass', 'angle', 'altitude',
+                'distance', 'radius', 'time'):
+        assert key in result.columns
+
+    t = np.arange(0, 1000, input_data['dt'])
+    init_state = (input_data['velocity'], input_data['density']*4/3*np.pi*(input_data['radius']**3),
+                  input_data['angle'], input_data['init_altitude'], 0., input_data['radius'])
+    P1 = odeint(planet.dmove_odeint, init_state, t, args=([input_data['strength'], input_data['density']],))
+    # we don't need to invert angle delete something here (about angle)
+
+    result = pd.DataFrame({'velocity': P1[:, 0],
+                              'mass': P1[:, 1],
+                              'angle': P1[:, 2],
+                              'altitude': P1[:, 3],
+                              'distance': P1[:, 4],
+                              'radius': P1[:, 5],
+                              'time': t}, index=range(len(P1)))
+    assert result.velocity.iloc[0] == input_data['velocity']
+    assert result.angle.iloc[0] == input_data['angle']
+    assert result.altitude.iloc[0] == input_data['init_altitude']
+    assert result.distance.iloc[0] == 0.0
+    assert result.radius.iloc[0] == input_data['radius']
+    assert result.time.iloc[0] == 0.0
+
+
+def test_solve_atmospheric_entry_with_analytic(result, input_data):
+    assert  type(result) is pd.DataFrame
+
+    for key in ('velocity', 'mass', 'angle', 'altitude',
+                'distance', 'radius', 'time'):
+        assert key in result.columns
+
+    assert result.velocity.iloc[0] == input_data['velocity']
+    assert result.angle.iloc[0] == input_data['angle']
+    assert result.altitude.iloc[0] == input_data['init_altitude']
+    assert result.distance.iloc[0] == 0.0
+    assert result.radius.iloc[0] == input_data['radius']
+    assert result.time.iloc[0] == 0.0
