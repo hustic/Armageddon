@@ -410,6 +410,19 @@ class Planet():
         y = y + (k1 + 2 * (k2 + k3) + k4) / 6
         return y
 
+    def dmove_odeint(self, Point, t, sets):
+        C_D, g, C_H, Q, C_L, R_p, alpha, rho_m, rho_0, H, Y = (self.Cd, self.g, self.Ch, self.Q, self.Cl, self.Rp,
+                                                               self.alpha, sets[1], self.rho0, self.H, sets[0])
+        v, m, theta, z, x, r = Point
+        A = np.pi*(r**2)
+        rho_a = rho_0 * np.exp(-z / H)
+        return np.array([(-C_D*rho_a*A*(v**2))/(2*m) + g*np.sin(theta),
+                         (-C_H*rho_a*A*(v**3))/(2*Q),
+                        (g*np.cos(theta))/(v) - (C_L*rho_a*A*v)/(2*m) - (v*np.cos(theta))/(R_p + z),
+                        -v*np.sin(theta),
+                        (v*np.cos(theta))/(1 + z/R_p),
+                        v*((7/2*alpha*rho_a/rho_m)**(1/2)) if rho_a * (v**2) >= Y else 0])
+
     def plot_results(self, result):
         fig = plt.figure(figsize=(12, 8))
         fig.tight_layout()
