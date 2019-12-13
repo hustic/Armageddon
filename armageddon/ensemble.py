@@ -156,7 +156,6 @@ def plot_burst_altitude(ensemble):
     # Convert into histogram data
     counts, bins = np.histogram(burst_altitude, 20)
     bincenters = np.mean(np.vstack([bins[0:-1],bins[1:]]), axis=0)
-    print(bincenters)
     # Normalize to create probability distribution
     counts = counts/np.sum(counts)
 

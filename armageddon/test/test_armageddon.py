@@ -1,6 +1,8 @@
 
 from collections import OrderedDict
 import pandas as pd
+import numpy as np
+from scipy.integrate import solve_ivp
 
 from pytest import fixture
 
@@ -113,4 +115,3 @@ def test_ensemble(planet, armageddon):
                                                   rmin=8, rmax=12)
 
     assert 'burst_altitude' in ensemble.columns
-    
